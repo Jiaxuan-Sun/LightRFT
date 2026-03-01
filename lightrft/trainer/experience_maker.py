@@ -11,6 +11,7 @@ from lightrft.models import ActorLanguage
 
 from lightrft.models.utils import compute_approx_kl, compute_reward, masked_mean
 from lightrft.utils import init_logger, remote_rm_fn
+from .advantage_calculator import normalize_advantages_cross_batch
 
 logger = init_logger(__name__)
 
@@ -89,6 +90,7 @@ class Experience:
         - attention_mask: (B, S)
         - action_mask: (B, A)
         - kl: (B, A)
+        - action_entropy: (B, A) - Entropy values for high-entropy token filtering
 
     :param sequences: Token sequences including both prompt and response.
     :type sequences: torch.Tensor
@@ -110,6 +112,11 @@ class Experience:
     :type info: Optional[dict]
     :param kl: KL divergence between current and reference policy.
     :type kl: Optional[torch.Tensor]
+    :param action_entropy: Entropy values for each action token, used for high-entropy token
+        filtering. When provided, enables training only on high-entropy tokens (forking tokens
+        that determine reasoning directions), improving training efficiency. Shape: (B, A).
+        See: https://arxiv.org/abs/2506.01939
+    :type action_entropy: Optional[torch.Tensor]
     """
 
     sequences: torch.Tensor
@@ -122,6 +129,7 @@ class Experience:
     action_mask: Optional[torch.BoolTensor]
     info: Optional[dict]
     kl: Optional[torch.Tensor] = None
+    action_entropy: Optional[torch.Tensor] = None  # Entropy for high-entropy token filtering
 
     @torch.no_grad()
     def to_device(self, device: torch.device) -> None:
@@ -141,6 +149,8 @@ class Experience:
             self.attention_mask = self.attention_mask.to(device)
         if self.action_mask is not None:
             self.action_mask = self.action_mask.to(device)
+        if self.action_entropy is not None:
+            self.action_entropy = to(self.action_entropy, device)
 
     def pin_memory(self):
         """
@@ -159,6 +169,8 @@ class Experience:
             self.attention_mask = self.attention_mask.pin_memory()
         if self.action_mask is not None:
             self.action_mask = self.action_mask.pin_memory()
+        if self.action_entropy is not None:
+            self.action_entropy = pin_memory(self.action_entropy)
         return self
 
 
@@ -391,6 +403,10 @@ class NaiveExperienceMaker(ABC):
             # Remove unnecessary info
             experience.kl = None
             del experience.info["num_actions"]
+
+        # Cross-batch advantage normalization
+        experiences = normalize_advantages_cross_batch(experiences, self.advantage_estimator, self.strategy.args)
+
         return experiences
 
     @torch.no_grad()

@@ -6,9 +6,9 @@
 
 **Light, Efficient, Omni-modal & Reward-model Driven Reinforcement Fine-Tuning Framework**
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/opendilab/lightrft)
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.5.1+-ee4c2c.svg)](https://pytorch.org/)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/opendilab/lightrft)
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.9.1+-ee4c2c.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
 English | [简体中文](README_zh.md)
@@ -84,7 +84,7 @@ For detailed algorithm descriptions, implementation details, and usage guide, se
 | **DAPO** | Policy Optimization | Decoupled clip and dynamic sampling policy optimization | [arXiv:2503.14476](https://arxiv.org/abs/2503.14476) |
 | **REINFORCE++** | Advantage Estimation | Improved baseline estimation | [arXiv:2501.03262](https://arxiv.org/abs/2501.03262) |
 | **CPGD** | Advantage Estimation | KL-based drift constraint | [arXiv:2505.12504](https://arxiv.org/abs/2505.12504) |
-| **FIRE Sampling** | Sampling Strategy | Filtering and ranking strategies | [arXiv:2410.21236](https://arxiv.org/abs/2410.21236) |
+| **FIRE Sampling** | Sampling Strategy | High-temperature first token sampling for improved diversity | [arXiv:2410.21236](https://arxiv.org/abs/2410.21236) |
 
 ---
 
@@ -92,28 +92,95 @@ For detailed algorithm descriptions, implementation details, and usage guide, se
 
 ### Requirements
 
-- Python >= 3.10
+- Python >= 3.12
 - CUDA >= 12.8
-- PyTorch >= 2.5.1
+- PyTorch >= 2.9.1
 
 ### Docker Images
 
-TO BE DONE
+We provide pre-built Docker images for easy deployment and consistent environments. You can also build your own images using the provided `Dockerfile` and `Makefile`.
+
+#### Using Pre-built Images
+
+The official Docker images are available on [Docker Hub](https://hub.docker.com/r/opendilab/lightrft). You can pull the latest version using:
+
+```shell
+docker pull opendilab/lightrft:v0.1.0
+```
+
+To run a container with GPU support:
+
+```shell
+docker run --gpus all -it --rm \
+    -v /path/to/your/data:/app/data \
+    -v /path/to/your/checkpoints:/app/checkpoints \
+    opendilab/lightrft:v0.1.0 /bin/bash
+```
+
+#### Building Custom Images
+
+If you need to customize the environment or build from a specific branch, you can use the provided `Makefile` to build the image locally.
+
+1. **Prerequisites**: Ensure you have Docker and NVIDIA Container Toolkit installed.
+2. **Build the image**:
+   ```shell
+   # Build the image with the default name (opendilab/lightrft:v${VERSION})
+   make dbuild
+   ```
+   The `IMAGE_NAME` is automatically determined based on the current version of the project. You can also override it:
+   ```shell
+   make dbuild IMAGE_NAME=your-custom-tag:latest
+   ```
+
+3. **Technical Details**:
+   - **Base Image**: `nvcr.io/nvidia/pytorch:25.01-py3` (includes PyTorch 2.5+ and CUDA 12.8).
+   - **Dependencies**: The build process installs essential components including `vLLM`, `DeepSpeed`, `Flash-Attention`, and `SGLang` in a specific order to ensure stability.
+   - **Optimization**: The `Dockerfile` uses multi-layer optimization and environment variables for non-interactive installation.
 
 ### Installation
 
-Clone and install LightRFT:
+#### Standard Installation
+
+LightRFT uses **SGLang** as the default inference backend with **Flash-Attention** for optimized performance.
 
 ```bash
 # Clone the repository
 git clone https://github.com/opendilab/LightRFT.git
 cd LightRFT
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Install LightRFT
+# Install LightRFT with all core dependencies
 pip install -e .
+```
+
+**What gets installed**: PyTorch, SGLang, Flash-Attention, Transformers, DeepSpeed, and other core dependencies.
+
+#### Optional: Install vLLM Backend
+
+If you want to use vLLM instead of (or alongside) SGLang:
+
+```bash
+# Install vLLM backend
+pip install ".[vllm]"
+
+# Or install vLLM directly
+pip install vllm>=0.13.3
+```
+
+#### Troubleshooting Flash-Attention Installation
+
+Flash-Attention is included by default but may fail on some systems due to CUDA compatibility. If installation fails, try:
+
+**Option 1: Use pre-built wheels (recommended)**
+```bash
+# Download the appropriate wheel from https://github.com/Dao-AILab/flash-attention/releases
+# Example for CUDA 12.x and PyTorch 2.9:
+pip install flash_attn-2.8.3+cu12torch2.9cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+```
+
+**Option 2: Use Docker (easiest)**
+```bash
+# The official Docker images include all dependencies
+docker pull opendilab/lightrft:v0.1.0
 ```
 
 
@@ -170,21 +237,27 @@ LightRFT/
 │   │   ├── replay_buffer_vl.py    # VLM replay buffer
 │   │   ├── replay_buffer_utils.py # Replay buffer utilities
 │   │   ├── kl_controller.py       # KL divergence controller
+│   │   ├── image_utils.py         # Image utilities
+│   │   ├── video_utils.py         # Video utilities
 │   │   └── utils.py               # Trainer utilities
 │   ├── datasets/                  # Dataset processing
-│   │   ├── audio_alpaca.py        # Audio Alpaca dataset
+│   │   ├── audio_alpaca.py        # Data Handler for Audio Alpaca dataset
+│   │   ├── genai_bench.py         # Data Handler for GenAI Bench dataset
 │   │   ├── grm_dataset.py         # Generative reward model dataset
-│   │   ├── hpdv3.py               # HPDv3 reward model dataset
-│   │   ├── image_reward_db.py     # Image reward database
-│   │   ├── imagegen_cot_reward.py # Image generation CoT generative reward
-│   │   ├── omnirewardbench.py     # OmniRewardBench dataset
+│   │   ├── hpdv3.py               # Data Handler for HPDv3 reward model dataset
+│   │   ├── image_reward_db.py     # Data Handler for ImageRewardDB dataset
+│   │   ├── imagegen_cot_reward.py # Data Handler for ImageGen-CoT-Reward dataset
+│   │   ├── omnirewardbench.py     # Data Handler for OmniRewardBench dataset
 │   │   ├── process_reward_dataset.py # Reward dataset processing
 │   │   ├── prompts_dataset.py     # LLM Prompts dataset
 │   │   ├── prompts_dataset_vl.py  # Vision-language prompts dataset
-│   │   ├── rapidata.py            # Rapidata reward modeldataset
+│   │   ├── rapidata.py            # Data Handler for Rapidata T2I/T2V dataset
+│   │   ├── rft_dataset.py         # Reinforcement Fine-Tuning (RFT) dataset
 │   │   ├── sft_dataset.py         # SFT dataset
 │   │   ├── sft_dataset_vl.py      # VLM SFT dataset
 │   │   ├── srm_dataset.py         # Scalar reward model base dataset
+│   │   ├── videodpo.py            # Data Handler for VideoDPO dataset
+│   │   ├── videogen_rewardbench.py # Data Handler for VideoGen-RewardBench dataset
 │   │   └── utils.py               # Dataset utilities
 │   └── utils/                     # Utility functions
 │       ├── ckpt_scripts/          # Checkpoint processing scripts
@@ -200,6 +273,7 @@ LightRFT/
 ├── examples/                      # Usage examples
 │   ├── gsm8k_geo3k/               # GSM8K/Geo3K math reasoning training examples
 │   ├── grm_training/              # Generative reward model training examples
+│   ├── grm_vl_rl/                 # Reinforcement fine-tuning for generative reward model training examples
 │   ├── srm_training/              # Scalar reward model training examples
 │   ├── chat/                      # Model dialogue examples
 │
@@ -233,6 +307,7 @@ LightRFT/
 - **`examples/`**: Complete training examples and scripts
   - `gsm8k_geo3k/`: GSM8K and Geo3K math reasoning training examples
   - `grm_training/`: Generative reward model training examples
+  - `grm_vl_rl/`: Reinforcement fine-tuning generative reward model training examples
   - `srm_training/`: Scalar reward model training examples
   - `chat/`: Model dialogue examples
 - **`docs/`**: Sphinx documentation with complete user guides and API documentation
@@ -340,6 +415,12 @@ Live documentation preview:
 make docs-live
 # Visit http://localhost:8000
 ```
+
+## Roadmap
+
+- [v0.1.2](https://github.com/opendilab/LightRFT/issues/28)
+- [v0.1.1](https://github.com/opendilab/LightRFT/issues/19)
+
 
 ## 🤝 Contributing
 

@@ -6,9 +6,9 @@
 
 **轻量化、全模态和奖励模型驱动的强化学习微调框架**
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/opendilab/lightrft)
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.5.1+-ee4c2c.svg)](https://pytorch.org/)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/opendilab/lightrft)
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.9.1+-ee4c2c.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
 [English](README.md) | 简体中文
@@ -84,7 +84,7 @@
 | **REINFORCE++** | Advantage Estimation | 改进基线估计 | [arXiv:2501.03262](https://arxiv.org/abs/2501.03262) |
 | **DAPO** | Policy Optimization | 解耦剪裁和动态采样策略优化 | [arXiv:2503.14476](https://arxiv.org/abs/2503.14476) |
 | **CPGD** | Advantage Estimation | KL漂移约束 | [arXiv:2505.12504](https://arxiv.org/abs/2505.12504) |
-| **FIRE Sampling** | Sampling Strategy | 过滤与排序策略 | [arXiv:2410.21236](https://arxiv.org/abs/2410.21236) |
+| **FIRE Sampling** | Sampling Strategy | 高温度首token采样提升多样性 | [arXiv:2410.21236](https://arxiv.org/abs/2410.21236) |
 
 ---
 
@@ -92,28 +92,95 @@
 
 ### 环境要求
 
-- Python >= 3.10
+- Python >= 3.12
 - CUDA >= 12.8
-- PyTorch >= 2.5.1
+- PyTorch >= 2.9.1
 
 ### Docker 镜像
 
-TO BE DONE
+我们提供预构建的 Docker 镜像，以便于快速部署并确保环境的一致性。您也可以使用项目中提供的 `Dockerfile` 和 `Makefile` 自行构建镜像。
+
+#### 使用预构建镜像
+
+官方 Docker 镜像托管在 [Docker Hub](https://hub.docker.com/r/opendilab/lightrft)。您可以使用以下命令获取最新版本：
+
+```shell
+docker pull opendilab/lightrft:v0.1.0
+```
+
+使用 GPU 支持运行容器：
+
+```shell
+docker run --gpus all -it --rm \
+    -v /path/to/your/data:/app/data \
+    -v /path/to/your/checkpoints:/app/checkpoints \
+    opendilab/lightrft:v0.1.0 /bin/bash
+```
+
+#### 自行构建镜像
+
+如果您需要自定义环境或基于特定分支进行构建，可以使用提供的 `Makefile` 在本地构建镜像。
+
+1. **前提条件**：确保您的系统已安装 Docker 和 NVIDIA Container Toolkit。
+2. **构建镜像**：
+   ```shell
+   # 使用默认名称构建镜像 (opendilab/lightrft:v${VERSION})
+   make dbuild
+   ```
+   `IMAGE_NAME` 将根据项目的当前版本自动确定。您也可以手动指定标签：
+   ```shell
+   make dbuild IMAGE_NAME=your-custom-tag:latest
+   ```
+
+3. **技术细节**：
+   - **基础镜像**：采用 `nvcr.io/nvidia/pytorch:25.01-py3`（包含 PyTorch 2.5+ 和 CUDA 12.8）。
+   - **依赖安装**：构建过程会按照严格的顺序安装 `vLLM`、`DeepSpeed`、`Flash-Attention` 和 `SGLang` 等核心组件，以确保环境稳定性。
+   - **优化策略**：`Dockerfile` 采用了多层构建优化，并配置了非交互式安装的环境变量。
 
 ### 安装步骤
 
-克隆并安装 LightRFT:
+#### 标准安装
+
+LightRFT 默认使用 **SGLang** 作为推理后端，并包含 **Flash-Attention** 以优化性能。
 
 ```bash
 # 克隆仓库
 git clone https://github.com/opendilab/LightRFT.git
 cd LightRFT
 
-# 安装依赖
-pip install -r requirements.txt
-
-# 安装 LightRFT
+# 安装 LightRFT 及所有核心依赖
 pip install -e .
+```
+
+**安装内容**: PyTorch、SGLang、Flash-Attention、Transformers、DeepSpeed 和其他核心依赖。
+
+#### 可选：安装 vLLM 后端
+
+如果您想使用 vLLM 替代（或配合）SGLang：
+
+```bash
+# 安装 vLLM 后端
+pip install ".[vllm]"
+
+# 或直接安装 vLLM
+pip install vllm>=0.13.3
+```
+
+#### Flash-Attention 安装问题排查
+
+Flash-Attention 默认包含在安装中，但在某些系统上可能因 CUDA 兼容性而安装失败。如果遇到问题，请尝试：
+
+**方式 1: 使用预编译的 wheel 文件（推荐）**
+```bash
+# 从 https://github.com/Dao-AILab/flash-attention/releases 下载适合的 wheel 文件
+# 例如 CUDA 12.x 和 PyTorch 2.9:
+pip install flash_attn-2.8.3+cu12torch2.9cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+```
+
+**方式 2: 使用 Docker（最简单）**
+```bash
+# 官方 Docker 镜像包含所有依赖
+docker pull opendilab/lightrft:v0.1.0
 ```
 
 
@@ -140,93 +207,100 @@ bash examples/gsm8k_geo3k/run_grpo_geo3k_qwen2.5_vl_7b.sh
 
 ```
 LightRFT/
-├── lightrft/                      # 核心库
-│   ├── strategy/                  # 训练&推理策略
-│   │   ├── fsdp/                  # FSDP 实现
-│   │   ├── deepspeed/             # DeepSpeed 实现
-│   │   ├── vllm_utils/            # vLLM 工具
-│   │   ├── sglang_utils/          # SGLang 工具
-│   │   └── utils/                 # 策略工具函数
-│   ├── models/                    # 模型定义
-│   │   ├── actor_al.py            # 音频-语言模型 Actor
-│   │   ├── actor_language.py      # 语言模型 Actor
-│   │   ├── actor_vl.py            # 视觉-语言模型 Actor
-│   │   ├── grm_vl.py              # 生成式奖励模型（视觉-语言）
-│   │   ├── srm_al.py              # 标量奖励模型（音频-语言）
-│   │   ├── srm_vl.py              # 标量奖励模型（视觉-语言）
-│   │   ├── loss.py                # 损失函数
-│   │   ├── monkey_patch/          # 分布式训练模型适配补丁
-│   │   ├── tests/                 # 模型测试
-│   │   └── utils.py               # 模型工具函数
-│   ├── trainer/                   # 训练器实现
-│   │   ├── ppo_trainer.py         # LLM PPO 训练器
-│   │   ├── ppo_trainer_vl.py      # VLM PPO 训练器
-│   │   ├── spmd_ppo_trainer.py    # SPMD PPO 训练器扩展（**核心**）
-│   │   ├── grm_trainer_vl.py      # 生成式奖励模型训练器（视觉-语言）
-│   │   ├── srm_trainer_al.py      # 标量奖励模型训练器（音频-语言）
-│   │   ├── srm_trainer_vl.py      # 标量奖励模型训练器（视觉-语言）
-│   │   ├── fast_exp_maker.py      # 快速经验生成器（**核心**）
-│   │   ├── experience_maker.py    # 基础经验生成器
-│   │   ├── experience_maker_vl.py # VLM 基础经验生成器
-│   │   ├── replay_buffer.py       # 经验回放缓冲区
-│   │   ├── replay_buffer_vl.py    # VLM 经验回放缓冲区
-│   │   ├── replay_buffer_utils.py # 经验回放缓冲区工具函数
-│   │   ├── kl_controller.py       # KL 散度控制器
-│   │   └── utils.py               # 训练器工具函数
-│   ├── datasets/                  # 数据集处理
-│   │   ├── audio_alpaca.py        # Audio Alpaca 数据集
-│   │   ├── grm_dataset.py         # 生成式奖励模型数据集
-│   │   ├── hpdv3.py               # HPDv3 奖励模型数据集
-│   │   ├── image_reward_db.py     # 图像奖励数据库
-│   │   ├── imagegen_cot_reward.py # 图像生成 CoT 生成式奖励
-│   │   ├── omnirewardbench.py     # OmniRewardBench 数据集
+├── lightrft/                         # 核心库
+│   ├── strategy/                     # 训练&推理策略
+│   │   ├── fsdp/                     # FSDP 实现
+│   │   ├── deepspeed/                # DeepSpeed 实现
+│   │   ├── vllm_utils/               # vLLM 工具
+│   │   ├── sglang_utils/             # SGLang 工具
+│   │   └── utils/                    # 策略工具函数
+│   ├── models/                       # 模型定义
+│   │   ├── actor_al.py               # 音频-语言模型 Actor
+│   │   ├── actor_language.py         # 语言模型 Actor
+│   │   ├── actor_vl.py               # 视觉-语言模型 Actor
+│   │   ├── grm_vl.py                 # 生成式奖励模型（视觉-语言）
+│   │   ├── srm_al.py                 # 标量奖励模型（音频-语言）
+│   │   ├── srm_vl.py                 # 标量奖励模型（视觉-语言）
+│   │   ├── loss.py                   # 损失函数
+│   │   ├── monkey_patch/             # 分布式训练模型适配补丁
+│   │   ├── tests/                    # 模型测试
+│   │   └── utils.py                  # 模型工具函数
+│   ├── trainer/                      # 训练器实现
+│   │   ├── ppo_trainer.py            # LLM PPO 训练器
+│   │   ├── ppo_trainer_vl.py         # VLM PPO 训练器
+│   │   ├── spmd_ppo_trainer.py       # SPMD PPO 训练器扩展（**核心**）
+│   │   ├── grm_trainer_vl.py         # 生成式奖励模型训练器（视觉-语言）
+│   │   ├── srm_trainer_al.py         # 标量奖励模型训练器（音频-语言）
+│   │   ├── srm_trainer_vl.py         # 标量奖励模型训练器（视觉-语言）
+│   │   ├── fast_exp_maker.py         # 快速经验生成器（**核心**）
+│   │   ├── experience_maker.py       # 基础经验生成器
+│   │   ├── experience_maker_vl.py    # VLM 基础经验生成器
+│   │   ├── replay_buffer.py          # 经验回放缓冲区
+│   │   ├── replay_buffer_vl.py       # VLM 经验回放缓冲区
+│   │   ├── replay_buffer_utils.py    # 经验回放缓冲区工具函数
+│   │   ├── kl_controller.py          # KL 散度控制器
+│   │   ├── image_utils.py            # 图像工具函数
+│   │   ├── video_utils.py            # 视频工具函数
+│   │   └── utils.py                  # 训练器工具函数
+│   ├── datasets/                     # 数据集处理
+│   │   ├── audio_alpaca.py           # Audio Alpaca 数据集的 Data Handler
+│   │   ├── genai_bench.py            # GenAI Bench 数据集的 Data Handler
+│   │   ├── grm_dataset.py            # 生成式奖励模型数据集
+│   │   ├── hpdv3.py                  # HPDv3 奖励模型数据集的 Data Handler
+│   │   ├── image_reward_db.py        # ImageRewardDB 数据集的 Data Handler
+│   │   ├── imagegen_cot_reward.py    # ImageGen-CoT-Reward 数据集的 Data Handler
+│   │   ├── omnirewardbench.py        # OmniRewardBench 数据集的 Data Handler
 │   │   ├── process_reward_dataset.py # 奖励数据集处理
-│   │   ├── prompts_dataset.py     # LLM 提示词数据集
-│   │   ├── prompts_dataset_vl.py  # 视觉-语言提示词数据集
-│   │   ├── rapidata.py            # Rapidata 奖励模型数据集
-│   │   ├── sft_dataset.py         # SFT 数据集
-│   │   ├── sft_dataset_vl.py      # VLM SFT 数据集
-│   │   ├── srm_dataset.py         # 标量奖励模型基础数据集
-│   │   └── utils.py               # 数据集工具函数
-│   └── utils/                     # 工具函数
-│       ├── ckpt_scripts/          # 检查点处理脚本
-│       ├── cli_args.py            # 命令行参数解析
-│       ├── distributed_sampler.py # 分布式采样器
-│       ├── logging_utils.py       # 日志工具函数
-│       ├── processor.py           # HuggingFace 模型数据处理器
-│       ├── remote_rm_utils.py     # 远程奖励模型工具函数
-│       ├── timer.py               # 计时器工具函数
-│       ├── trajectory_saver.py     # 轨迹保存器
-│       └── utils.py               # 通用工具函数
+│   │   ├── prompts_dataset.py        # LLM 提示词数据集
+│   │   ├── prompts_dataset_vl.py     # 视觉-语言提示词数据集
+│   │   ├── rapidata.py               # Rapidata T2I/T2V 数据集的 Data Handler
+│   │   ├── rft_dataset.py            # 强化微调 (RFT) 数据集
+│   │   ├── sft_dataset.py            # SFT 数据集
+│   │   ├── sft_dataset_vl.py         # VLM SFT 数据集
+│   │   ├── srm_dataset.py            # 标量奖励模型基础数据集
+│   │   ├── videodpo.py               # VideoDPO 数据集的 Data Handler
+│   │   ├── videogen_rewardbench.py   # VideoGen-RewardBench 数据集的 Data Handler
+│   │   └── utils.py                  # 数据集工具函数
+│   └── utils/                        # 工具函数
+│       ├── ckpt_scripts/             # 检查点处理脚本
+│       ├── cli_args.py               # 命令行参数解析
+│       ├── distributed_sampler.py    # 分布式采样器
+│       ├── logging_utils.py          # 日志工具函数
+│       ├── processor.py              # HuggingFace 模型数据处理器
+│       ├── remote_rm_utils.py        # 远程奖励模型工具函数
+│       ├── timer.py                  # 计时器工具函数
+│       ├── trajectory_saver.py       # 轨迹保存器
+│       └── utils.py                  # 通用工具函数
 │
-├── examples/                      # 使用示例
-│   ├── gsm8k_geo3k/               # GSM8K/Geo3K 数学推理训练示例
-│   ├── grm_training/              # 生成式奖励模型训练示例
-│   ├── srm_training/              # 标量奖励模型训练示例
-│   ├── chat/                      # 模型对话示例
+├── examples/                         # 使用示例
+│   ├── gsm8k_geo3k/                  # GSM8K/Geo3K 数学推理训练示例
+│   ├── grm_training/                 # 生成式奖励模型训练示例
+│   ├── grm_vl_rl/                    # 强化微调生成式奖励模型训练示例
+│   ├── srm_training/                 # 标量奖励模型训练示例
+│   ├── chat/                         # 模型对话示例
 │
-├── docs/                          # 📚 Sphinx 文档
-│   ├── Makefile                   # 文档构建 Makefile
-│   ├── make.bat                   # 文档构建批处理文件
-│   └── source/                    # 文档源码
-│       ├── _static/               # 静态文件（CSS 等）
-│       ├── api_doc/               # API 文档
-│       ├── best_practice/         # 最佳实践 & 资源
-│       ├── installation/          # 安装指南
-│       └── quick_start/           # 快速开始 & 用户指南
+├── docs/                             # 📚 Sphinx 文档
+│   ├── Makefile                      # 文档构建 Makefile
+│   ├── make.bat                      # 文档构建批处理文件
+│   └── source/                       # 文档源码
+│       ├── _static/                  # 静态文件（CSS 等）
+│       ├── api_doc/                  # API 文档
+│       ├── best_practice/            # 最佳实践 & 资源
+│       ├── installation/             # 安装指南
+│       └── quick_start/              # 快速开始 & 用户指南
 │
-├── assets/                        # 资源文件
-│   └── logo.png                   # 项目 Logo
+├── assets/                           # 资源文件
+│   └── logo.png                      # 项目 Logo
 │
-├── CHANGELOG.md                   # 更新日志
-├── LICENSE                        # 许可证文件
-├── Makefile                       # 项目 Makefile
-├── README.md                      # 项目文档（英文）
-├── README_zh.md                   # 项目文档（中文）
-├── requirements.txt               # Python 依赖
-├── requirements-dev.txt           # 开发依赖
-├── requirements-doc.txt           # 文档依赖
-└── setup.py                       # 包安装脚本
+├── CHANGELOG.md                      # 更新日志
+├── LICENSE                           # 许可证文件
+├── Makefile                          # 项目 Makefile
+├── README.md                         # 项目文档（英文）
+├── README_zh.md                      # 项目文档（中文）
+├── requirements.txt                  # Python 依赖
+├── requirements-dev.txt              # 开发依赖
+├── requirements-doc.txt              # 文档依赖
+└── setup.py                          # 包安装脚本
 ```
 
 ### 🔑 关键目录说明
@@ -235,6 +309,7 @@ LightRFT/
 - **`examples/`**: 完整的训练示例和脚本
   - `gsm8k_geo3k/`: GSM8K和Geo3K数学推理训练示例
   - `grm_training/`: 生成式奖励模型训练示例
+  - `grm_vl_rl/`: 强化微调生成式奖励模型训练示例
   - `srm_training/`: 标量奖励模型训练示例
   - `chat/`: 模型对话示例
 - **`docs/`**: Sphinx文档，包含完整的使用指南和API文档
@@ -339,6 +414,12 @@ make docs
 make docs-live
 # 访问 http://localhost:8000
 ```
+
+
+## 开发计划
+
+- [v0.1.2](https://github.com/opendilab/LightRFT/issues/28)
+- [v0.1.1](https://github.com/opendilab/LightRFT/issues/19)
 
 
 ## 🤝 贡献指南

@@ -7,6 +7,7 @@ The main components are:
 - compute_clip_fraction: Calculates the fraction of tensor elements that fall outside specified bounds
 - RunningMoments: Maintains running mean and standard deviation statistics for streaming data
 - get_cpgd_advantages_returns: Computes advantages and returns for CPGD algorithm
+- vllm_ge_0130: Version checking utility for vLLM compatibility
 
 These utilities are particularly useful in RL algorithms like PPO where clipping statistics and
 normalization are important for training stability and monitoring.
@@ -16,6 +17,14 @@ import copy
 import torch
 from copy import deepcopy
 from typing import Callable, List, Tuple, Union, Optional
+
+# Conditional import: vLLM is optional and only needed when using vLLM backend
+# The default backend is SGLang, which doesn't require vLLM
+# To use vLLM backend, install with: pip install "LightRFT[vllm]"
+try:
+    import vllm
+except ImportError:
+    vllm = None
 
 
 def fire_sampling(
@@ -30,14 +39,23 @@ def fire_sampling(
     all_prompts: Optional[List[str]] = None,
     all_images: Optional[List] = None,
     all_images_num: Optional[List[int]] = None,
+    all_videos: Optional[List] = None,
+    all_videos_num: Optional[List[int]] = None,
     sampling_params: Optional[Union[dict, object]] = None,
 ) -> List:
     """
     FIRE sampling (Flaming-hot Initiation with Regular Execution)
 
     FIRE sampling paper link: https://arxiv.org/abs/2410.21236
-    The first token is generated with high temperature and optional filters,
-    and the rest tokens are generated with normal temperature.
+
+    According to the paper, FIRE sampling:
+    1. Samples the FIRST token at a very high temperature ("flaming-hot initiation")
+    2. Proceeds with regular temperature for remaining tokens
+    3. IMPORTANT: top_k, top_p, min_p, and other sampling parameters remain THE SAME
+       for both first token and remaining tokens. Only temperature changes.
+
+    This implementation follows the paper's design: we only modify temperature between
+    the first token and remaining tokens, keeping all other sampling parameters identical.
 
     :param all_prompt_token_ids: List of tokenized prompts
     :type all_prompt_token_ids: List[List[int]]
@@ -45,13 +63,13 @@ def fire_sampling(
     :type generate_fn: Callable
     :param engine_type: Backend type ("vllm" or "sglang")
     :type engine_type: str
-    :param first_token_temperature: Temperature for first token generation
+    :param first_token_temperature: Temperature for first token generation (default: 10.0)
     :type first_token_temperature: float
     :param temperature: Temperature for remaining tokens
     :type temperature: float
-    :param first_token_top_k: Top-k for first token
+    :param first_token_top_k: DEPRECATED - kept for backward compatibility, will be ignored
     :type first_token_top_k: int
-    :param first_token_top_p: Top-p for first token
+    :param first_token_top_p: DEPRECATED - kept for backward compatibility, will be ignored
     :type first_token_top_p: float
     :param is_multimodal: Whether this is multimodal generation
     :type is_multimodal: bool
@@ -61,24 +79,28 @@ def fire_sampling(
     :type all_images: Optional[List]
     :param all_images_num: Number of images per prompt
     :type all_images_num: Optional[List[int]]
-    :param sampling_params: Original sampling parameters (for fallback)
+    :param all_videos: Videos (for multimodal)
+    :type all_videos: Optional[List]
+    :param all_videos_num: Number of videos per prompt
+    :type all_videos_num: Optional[List[int]]
+    :param sampling_params: Original sampling parameters
     :type sampling_params: Optional[Union[dict, object]]
 
     :return: List of generation outputs
     :rtype: List
     """
     # Step 1: Generate the first token with high temperature
+    # According to the paper, ONLY temperature changes for the first token.
+    # All other parameters (top_k, top_p, min_p, etc.) remain the same.
     if engine_type == "vllm":
         sampling_params_first = copy.deepcopy(sampling_params)
         sampling_params_first.temperature = first_token_temperature
-        sampling_params_first.top_k = first_token_top_k
-        sampling_params_first.top_p = first_token_top_p
+        # Keep top_k and top_p from original sampling_params (do NOT override)
         sampling_params_first.max_tokens = 1
     else:  # sglang
         sampling_params_first = copy.deepcopy(sampling_params)
         sampling_params_first["temperature"] = first_token_temperature
-        sampling_params_first["top_k"] = first_token_top_k
-        sampling_params_first["top_p"] = first_token_top_p
+        # Keep top_k and top_p from original sampling_params (do NOT override)
         sampling_params_first["max_new_tokens"] = 1
 
     # Generate first token
@@ -87,7 +109,9 @@ def fire_sampling(
         all_prompt_token_ids=all_prompt_token_ids,
         all_prompts=all_prompts if is_multimodal else None,
         all_images=all_images,
+        all_videos=all_videos,
         images_num=all_images_num if is_multimodal else None,
+        videos_num=all_videos_num if is_multimodal else None,
     )
 
     # Concatenate the first token to the prompt
@@ -112,7 +136,9 @@ def fire_sampling(
         all_prompt_token_ids=new_prompt_token_ids,
         all_prompts=all_prompts if is_multimodal else None,
         all_images=all_images,
+        all_videos=all_videos,
         images_num=all_images_num if is_multimodal else None,
+        videos_num=all_videos_num if is_multimodal else None,
     )
 
     # Merge the first token with the remaining tokens
@@ -145,16 +171,13 @@ def compute_clip_fraction(values: torch.Tensor, clip_max: float, clip_min: float
              clipped values in the input tensor.
     :rtype: torch.Tensor
 
-    **Example:**
+    Example::
 
+        .. code-block:: python
 
-
-    .. code-block:: python
-
-
-        >>> values = torch.tensor([[1.0, 2.0, 3.0], [0.5, 1.5, 2.5]])
-        >>> clip_fraction = compute_clip_fraction(values, clip_max=2.0, clip_min=1.0)
-        >>> print(clip_fraction)  # Should show fraction of values outside [1.0, 2.0]
+            >>> values = torch.tensor([[1.0, 2.0, 3.0], [0.5, 1.5, 2.5]])
+            >>> clip_fraction = compute_clip_fraction(values, clip_max=2.0, clip_min=1.0)
+            >>> print(clip_fraction)  # Should show fraction of values outside [1.0, 2.0]
     """
     numel = values.numel()
     if numel == 0:
@@ -186,19 +209,16 @@ class RunningMoments:
 
     Adapted from https://github.com/alibaba/ROLL
 
-    **Example:**
+    Example::
 
+        .. code-block:: python
 
-
-    .. code-block:: python
-
-
-        >>> moments = RunningMoments()
-        >>> batch1 = torch.randn(100)
-        >>> mean1, std1 = moments.update(batch1)
-        >>> batch2 = torch.randn(100)
-        >>> mean2, std2 = moments.update(batch2)
-        >>> print(f"Running mean: {moments.mean}, Running std: {moments.std}")
+            >>> moments = RunningMoments()
+            >>> batch1 = torch.randn(100)
+            >>> mean1, std1 = moments.update(batch1)
+            >>> batch2 = torch.randn(100)
+            >>> mean2, std2 = moments.update(batch2)
+            >>> print(f"Running mean: {moments.mean}, Running std: {moments.std}")
     """
     def __init__(self):
         """
@@ -228,17 +248,14 @@ class RunningMoments:
         :return: A tuple of (mean, std) for the current batch `xs`.
         :rtype: Tuple[float, float]
 
-        **Example:**
+        Example::
 
+            .. code-block:: python
 
-
-        .. code-block:: python
-
-
-            >>> moments = RunningMoments()
-            >>> new_data = torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])
-            >>> batch_mean, batch_std = moments.update(new_data)
-            >>> print(f"Batch mean: {batch_mean}, Batch std: {batch_std}")
+                >>> moments = RunningMoments()
+                >>> new_data = torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])
+                >>> batch_mean, batch_std = moments.update(new_data)
+                >>> print(f"Batch mean: {batch_mean}, Batch std: {batch_std}")
         """
         # 1. Get statistics for the new batch
         xs_count = xs.numel()
@@ -355,3 +372,29 @@ def get_cpgd_advantages_returns(
     returns = deepcopy(scores)
 
     return advantages, returns
+
+
+def vllm_ge_0130():
+    """
+    Check if vLLM version is greater than or equal to 0.13.0.
+
+    Starting from vLLM 0.13.0, truncate_prompt_tokens parameter must not exceed
+    max_model_len, requiring additional validation logic.
+
+    This function handles cases where vLLM is not installed by returning True,
+    which ensures compatibility when using the default SGLang backend.
+
+    :return: True if vLLM version >= 0.13.0 or if vLLM is not installed, False otherwise
+    :rtype: bool
+    """
+    if vllm is None:
+        # If vLLM is not installed (e.g., using SGLang backend), return True for safety
+        # This prevents issues in code paths that may reference this function
+        return True
+
+    try:
+        version_digits = int("".join(list(filter(str.isdigit, vllm.__version__))))
+        return version_digits >= 130
+    except (AttributeError, ValueError):
+        # If version cannot be determined, assume newer version for safety
+        return True

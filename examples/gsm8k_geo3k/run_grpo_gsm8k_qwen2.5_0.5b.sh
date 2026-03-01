@@ -48,8 +48,8 @@ EPISODE=30               # Total number of training episodes.
 WARMUP=0.03              # Learning rate warmup ratio.
 
 # --- Batch Size Configuration ---
-RBS=64                         # Rollout Batch Size.
-TBS=$((RBS * N_SAMPLES))       # Train Batch Size is derived from RBS and N_SAMPLES.
+RBS=128       # Rollout Batch Size.
+TBS=128       # Train Batch Size.
 
 # --- Learning and Model Settings ---
 KL=0.01                  # KL divergence coefficient.
@@ -70,18 +70,11 @@ MAX_EVAL_SAMPLES=1319    # Set to 1319 for a full evaluation on the GSM8K test s
 
 # --- Single-Node Distributed Setup ---
 # Update these if you are running in a multi-node environment.
-export MLP_WORKER_NUM=1                 # Number of nodes.
-export MLP_WORKER_GPU=8                 # Number of GPUs per node.
-export MLP_ROLE_INDEX=0                 # Rank of the current node.
-export MLP_WORKER_0_HOST="localhost"    # IP address of the master node (node 0).
-export MLP_WORKER_0_PORT=20090          # Port for the master node.
-
-# --- PyTorch Distributed Environment Variables ---
-export MASTER_ADDR=$MLP_WORKER_0_HOST
-export MASTER_PORT=$MLP_WORKER_0_PORT
-export NNODES=$MLP_WORKER_NUM
-export NODE_RANK=$MLP_ROLE_INDEX
-export GPUS_PER_NODE=$MLP_WORKER_GPU
+export NNODES=1                  # Number of nodes (machines)
+export GPUS_PER_NODE=8           # Number of GPUs per node
+export NODE_RANK=0               # Rank of the current node (0 for master, 1+ for workers)
+export MASTER_ADDR="localhost"   # IP address of the master node
+export MASTER_PORT=20090         # Port for the master node
 
 # --- vLLM/SGLang Engine Settings ---
 ENGINE_TP=2  # Tensor parallelism size for the inference engine. Adjust based on your model and GPU setup.
@@ -121,7 +114,7 @@ torchrun \
     --node_rank $NODE_RANK \
     --master-port $MASTER_PORT \
     --master-addr $MASTER_ADDR \
-    examples/safework_t1/train_colocate.py \
+    examples/gsm8k_geo3k/train_colocate.py \
     --pretrain "${PATH_TO_YOUR_BASE_MODEL}" \
     --save_trajectories \
     --advantage_estimator "group_norm" \
@@ -150,13 +143,14 @@ torchrun \
     --prompt_data "${PATH_TO_YOUR_GSM8K_DATASET}" \
     --input_key "prompt" \
     --label_key "label" \
-    --eval_steps 10 \
+    --eval_steps 20 \
     --eval_split "${EVAL_SPLIT}" \
     --max_eval_samples $MAX_EVAL_SAMPLES \
     --apply_chat_template \
     --gradient_checkpointing \
     --save_steps 20 \
     --max_ckpt_num 3 \
+    --engine_type sglang \
     --engine_mem_util 0.6 \
     --engine_tp_size $ENGINE_TP \
     --enable_engine_sleep \

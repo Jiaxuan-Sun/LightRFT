@@ -11,9 +11,9 @@
 
 在安装 LightRFT 之前，请确保您的环境满足以下要求：
 
-* Python >= 3.8
-* CUDA >= 11.8
-* PyTorch >= 2.5.1
+* Python >= 3.12
+* CUDA >= 12.8
+* PyTorch >= 2.9.1
 * 支持 CUDA 的 GPU
 
 Docker 镜像
@@ -27,7 +27,7 @@ TO BE DONE
 标准安装
 --------
 
-克隆并安装 LightRFT:
+LightRFT 默认使用 **SGLang** 作为推理后端，并包含 **Flash-Attention** 以优化性能。
 
 .. code-block:: bash
 
@@ -35,11 +35,43 @@ TO BE DONE
    git clone https://github.com/opendilab/LightRFT.git
    cd LightRFT
 
-   # 安装依赖
-   pip install -r requirements.txt
-
-   # 安装 LightRFT
+   # 安装 LightRFT 及所有核心依赖
    pip install -e .
+
+**安装内容**: PyTorch、SGLang、Flash-Attention、Transformers、DeepSpeed 和其他核心依赖。
+
+可选：安装 vLLM 后端
+--------------------
+
+如果您想使用 vLLM 替代（或配合）SGLang：
+
+.. code-block:: bash
+
+   # 安装 vLLM 后端
+   pip install ".[vllm]"
+
+   # 或直接安装 vLLM
+   pip install vllm>=0.13.3
+
+Flash-Attention 安装问题排查
+-----------------------------
+
+Flash-Attention 默认包含在安装中，但在某些系统上可能因 CUDA 兼容性而安装失败。如果遇到问题，请尝试：
+
+**方式 1: 使用预编译的 wheel 文件（推荐）**
+
+.. code-block:: bash
+
+   # 从 https://github.com/Dao-AILab/flash-attention/releases 下载适合的 wheel 文件
+   # 例如 CUDA 12.x 和 PyTorch 2.9:
+   pip install flash_attn-2.8.3+cu12torch2.9cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+
+**方式 2: 使用 Docker（最简单）**
+
+.. code-block:: bash
+
+   # 官方 Docker 镜像包含所有依赖
+   docker pull opendilab/lightrft:v0.1.0
 
 生成文档（可选）
 ================
@@ -155,7 +187,6 @@ LightRFT 组织成几个关键模块：
    │   │   ├── reward_models_utils.py # 奖励模型工具
    │   │   ├── run_grpo_gsm8k_qwen2.5_0.5b.sh    # GSM8K 训练脚本
    │   │   └── run_grpo_geo3k_qwen2.5_vl_7b.sh   # Geo3K VLM 训练脚本
-   │   ├── safework_t1/               # 安全可信工作示例
    │   └── srm_training/              # 安全奖励模型训练示例
    │
    ├── docs/                          # 📚 Sphinx 文档
@@ -198,7 +229,6 @@ LightRFT 组织成几个关键模块：
   * ``grm_training/``：通用奖励模型训练示例
   * ``srm_training/``：安全奖励模型训练示例
   * ``chat/``：对话模型训练示例
-  * ``safework_t1/``：安全可信工作示例
 
 * **docs/**：Sphinx 文档，包含完整的用户指南和 API 文档
 
@@ -262,7 +292,7 @@ LightRFT 组织成几个关键模块：
 如果遇到此处未涵盖的问题：
 
 * 查看项目的 `GitHub Issues <https://github.com/opendilab/LightRFT/issues>`_
-* 查阅 :doc:`../best_practice/strategy_usage` 了解训练配置
+* 查阅 :doc:`../best_practice/strategy_zh` 了解训练配置
 * 参考 ``examples/`` 目录中的示例脚本
 
 后续步骤
@@ -271,7 +301,7 @@ LightRFT 组织成几个关键模块：
 安装成功后：
 
 1. 查阅 :doc:`../quick_start` 指南了解基本使用方法
-2. 探索 :doc:`../best_practice/strategy_usage` 了解分布式训练策略
+2. 探索 :doc:`../best_practice/strategy_zh` 了解分布式训练策略
 3. 查看 ``examples/`` 目录中的完整训练示例
 4. 阅读算法文档了解具体实现细节
 

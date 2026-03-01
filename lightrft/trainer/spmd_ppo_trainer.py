@@ -29,6 +29,7 @@ from lightrft.utils.trajectory_saver import create_trajectory_saver
 
 from lightrft.trainer.replay_buffer import make_experience_batch
 from lightrft.trainer.replay_buffer_vl import make_experience_batch as make_experience_batch_vl
+from lightrft.models.utils import create_high_entropy_mask
 from lightrft.utils import init_logger
 
 logger = init_logger(__name__)
@@ -132,6 +133,9 @@ class SPMDPPOTrainerBase:
             processor=processor,
         )
 
+        # Extract high_entropy_token_ratio for entropy-based token filtering
+        self.high_entropy_token_ratio = kwargs.pop("high_entropy_token_ratio", 0.0)
+
         # Initialize loss function based on mode
         # Note: PolicyLoss is initialized in parent class (PPOTrainer/PPOTrainerVL)
         # We store GSPO parameters here for potential use in training_step
@@ -207,8 +211,46 @@ class SPMDPPOTrainerBase:
                     experience = make_experience_batch(items, packing_samples=self.packing_samples)
                 experience.to_device(device)
 
+                # ======================================================================================
+                # Validate data BEFORE calling training_step to prevent execution path divergence
+                # If validation is done inside training_step, different ranks may follow different code paths
+                # (some return early, others continue), causing deadlock in collective communication ops.
+
+                # Step 1: Each rank validates its local data
+                should_skip_local = False
+                if self.VLM and hasattr(self, '_validate_qwen_vl_tensors'):
+                    # Call the same validation logic used in training_step_actor
+                    sequences = experience.sequences
+                    pixel_values = experience.pixel_values
+
+                    # Validate before any forward pass
+                    is_valid = self._validate_qwen_vl_tensors(
+                        sequences, pixel_values, context="pre_training_validation"
+                    )
+                    should_skip_local = not is_valid
+
+                # Step 2: Synchronize skip decision across all ranks via all_reduce
+                # This ensures all ranks agree on whether to skip, preventing execution divergence
+                skip_flag = torch.tensor([1.0 if should_skip_local else 0.0], device=device)
+                torch.distributed.all_reduce(skip_flag, op=torch.distributed.ReduceOp.MAX)
+
+                # Step 3: Collectively skip if ANY rank detected invalid data
+                if skip_flag.item() > 0:
+                    if self.strategy.is_rank_0():
+                        pbar.set_description(f"Train epoch [{epoch + 1}/{self.max_epochs}] (skipping invalid batch)")
+                    continue  # All ranks skip together - no deadlock
+                # ======================================================================================
+
+                # Create entropy_mask if high_entropy_token_ratio > 0 and action_entropy is available
+                entropy_mask = None
+                if hasattr(experience, 'action_entropy') and experience.action_entropy is not None:
+                    if self.high_entropy_token_ratio > 0.0:
+                        entropy_mask = create_high_entropy_mask(
+                            experience.action_entropy, experience.action_mask, self.high_entropy_token_ratio
+                        )
+
                 # Call training_step which will handle both GSPO and standard modes
-                status = self.training_step(experience, global_steps)
+                status = self.training_step(experience, global_steps, entropy_mask=entropy_mask)
 
                 # for DP
                 # weighted mean for kl

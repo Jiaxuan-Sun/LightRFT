@@ -2,7 +2,7 @@ import os
 import sys
 import os.path
 from abc import ABC
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import torch
 import torch.nn as nn
@@ -90,7 +90,7 @@ class PPOTrainer(ABC):
         strategy,
         actor: ActorLanguage,
         critic: nn.Module,
-        reward_model: nn.Module,
+        reward_model: Union[nn.Module, List[nn.Module]],
         initial_model: ActorLanguage,
         ema_model: ActorLanguage,
         actor_optim: Optimizer,
@@ -99,7 +99,7 @@ class PPOTrainer(ABC):
         critic_scheduler,
         ema_beta: float = 0.992,
         init_kl_coef: float = 0.001,
-        kl_target: float = None,
+        kl_target: Optional[float] = None,
         kl_horizon: int = 10000,
         ptx_coef: float = 0,
         micro_train_batch_size: int = 8,
@@ -114,8 +114,8 @@ class PPOTrainer(ABC):
         tokenizer: Optional[Callable[[Any], dict]] = None,
         prompt_max_len: int = 128,
         dataloader_pin_memory: bool = True,
-        remote_rm_url: str = None,
-        reward_fn: Callable[[List[torch.Tensor]], torch.Tensor] = None,
+        remote_rm_url: Optional[str] = None,
+        reward_fn: Optional[Callable[[List[torch.Tensor]], torch.Tensor]] = None,
         save_hf_ckpt: bool = False,
         disable_ds_ckpt: bool = False,
         **generate_kwargs,
@@ -226,8 +226,16 @@ class PPOTrainer(ABC):
                 reinit=True,
             )
 
+            # Define separate metric namespaces for clarity:
+            # - rollout/*: Metrics from experience generation phase
+            # - train/*: Metrics from policy optimization phase
+            # - eval/*: Metrics from evaluation phase
+            wandb.define_metric("rollout/global_step")
+            wandb.define_metric("rollout/*", step_metric="rollout/global_step", step_sync=True)
+
             wandb.define_metric("train/global_step")
             wandb.define_metric("train/*", step_metric="train/global_step", step_sync=True)
+
             wandb.define_metric("eval/epoch")
             wandb.define_metric("eval/*", step_metric="eval/epoch", step_sync=True)
 
@@ -402,7 +410,10 @@ class PPOTrainer(ABC):
         torch.cuda.empty_cache()
         return status_mean
 
-    def training_step(self, experience: Experience, global_steps) -> Dict[str, float]:
+    def training_step(self,
+                      experience: Experience,
+                      global_steps,
+                      entropy_mask: Optional[torch.Tensor] = None) -> Dict[str, float]:
         """
         Single training step combining actor and critic updates.
 
@@ -410,17 +421,21 @@ class PPOTrainer(ABC):
         :type experience: Experience
         :param global_steps: Current global step count.
         :type global_steps: int
+        :param entropy_mask: Optional mask for high-entropy tokens.
+        :type entropy_mask: Optional[torch.Tensor]
         :return: Dictionary of training statistics.
         :rtype: Dict[str, float]
         """
         status = {}
         if global_steps > self.freezing_actor_steps:
-            status = self.training_step_actor(experience)
+            status = self.training_step_actor(experience, entropy_mask=entropy_mask)
         if self.critic is not None:
             status.update(self.training_step_critic(experience))
         return status
 
-    def training_step_actor(self, experience: Experience) -> Dict[str, float]:
+    def training_step_actor(self,
+                            experience: Experience,
+                            entropy_mask: Optional[torch.Tensor] = None) -> Dict[str, float]:
         """
         Actor training step.
 
@@ -467,6 +482,7 @@ class PPOTrainer(ABC):
             old_action_log_probs,
             advantages,
             action_mask=experience.action_mask,
+            entropy_mask=entropy_mask,
         )
 
         if self.args.use_kl_loss:
@@ -623,21 +639,62 @@ class PPOTrainer(ABC):
         :type client_states: dict
         """
         if global_step % args.logging_steps == 0:
+            # Define which metrics should be excluded from train/ logs to avoid duplication
+            # These metrics are already logged in the rollout/ namespace
+            ROLLOUT_ONLY_METRICS = {
+                'reward',  # Already logged as rollout/reward
+                'response_length',  # Already logged as rollout/response_length
+                'total_length',  # Rollout-specific metric
+                'num_actions',  # Rollout-specific metric
+                'return',  # Rollout-specific metric (computed from rewards)
+            }
+
+            # Also exclude reward_metrics sub-keys (format_reward, accuracy_reward)
+            ROLLOUT_ONLY_METRIC_PREFIXES = {'reward_metrics/'}
+
+            # Separate rollout and training metrics for clarity
+            rollout_metrics = {}
+            train_metrics = {}
+
+            for k, v in logs_dict.items():
+                if k.startswith('rollout_'):
+                    # Remove 'rollout_' prefix and log under rollout/ namespace
+                    clean_key = k.replace('rollout_', '', 1)
+                    rollout_metrics[clean_key] = v
+                elif k in ROLLOUT_ONLY_METRICS:
+                    # Skip metrics that are already in rollout/ namespace
+                    continue
+                elif any(k.startswith(prefix) for prefix in ROLLOUT_ONLY_METRIC_PREFIXES):
+                    # Skip reward_metrics/* sub-keys
+                    continue
+                else:
+                    # Training-specific metrics go under train/ namespace
+                    train_metrics[k] = v
+
             # Wandb logging
             if self._wandb is not None and self.strategy.is_rank_0():
-                logs = {
-                    "train/%s" % k: v
-                    for k, v in {
-                        **logs_dict,
-                        "global_step": global_step,
-                    }.items()
-                }
+                # Log rollout metrics with rollout/ prefix
+                if rollout_metrics:
+                    rollout_logs = {f"rollout/{k}": v for k, v in rollout_metrics.items()}
+                    rollout_logs["rollout/global_step"] = global_step
+                    self._wandb.log(rollout_logs)
+
+                # Log training metrics with train/ prefix
+                if train_metrics:
+                    train_logs = {f"train/{k}": v for k, v in train_metrics.items()}
+                    train_logs["train/global_step"] = global_step
+                    self._wandb.log(train_logs)
+
+                # Log performance stats
                 if self.experience_maker.perf_stats is not None:
-                    logs.update({f"perf/experience_maker/{k}": v for k, v in self.experience_maker.perf_stats.items()})
-                self._wandb.log(logs)
+                    perf_logs = {f"perf/experience_maker/{k}": v for k, v in self.experience_maker.perf_stats.items()}
+                    self._wandb.log(perf_logs)
+
             # TensorBoard logging
             elif self._tensorboard is not None and self.strategy.is_rank_0():
-                for k, v in logs_dict.items():
+                for k, v in rollout_metrics.items():
+                    self._tensorboard.add_scalar(f"rollout/{k}", v, global_step)
+                for k, v in train_metrics.items():
                     self._tensorboard.add_scalar(f"train/{k}", v, global_step)
                 if self.experience_maker.perf_stats is not None:
                     for k, v in self.experience_maker.perf_stats.items():

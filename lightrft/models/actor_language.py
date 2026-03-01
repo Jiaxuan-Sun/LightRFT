@@ -22,7 +22,8 @@ from transformers import (
 )
 from transformers.integrations.deepspeed import HfDeepSpeedConfig
 
-from .utils import apply_lora_configuration, log_probs_from_logits, reset_position_ids
+from .utils import apply_lora_configuration, log_probs_from_logits, reset_position_ids, entropy_from_logits
+from .actor_modality import ActorModality
 
 
 class ActorLanguage(nn.Module):
@@ -72,6 +73,9 @@ class ActorLanguage(nn.Module):
             temperature=0.7
         )
     """
+    # Model modality declaration - defines what types of inputs this model accepts
+    modality = ActorModality.LANGUAGE_ONLY
+
     def __init__(
         self,
         pretrain_or_model,
@@ -84,6 +88,7 @@ class ActorLanguage(nn.Module):
         ds_config: Optional[dict] = None,
         device_map: Optional[dict] = None,
         packing_samples: bool = False,
+        high_entropy_token_ratio: float = 0.0,
         **kwargs,
     ) -> None:
         """
@@ -93,6 +98,7 @@ class ActorLanguage(nn.Module):
         and configures the model for training or inference.
         """
         super().__init__()
+        self.high_entropy_token_ratio = high_entropy_token_ratio
 
         # ------------------------------------------------
         # 1. Directly pass in a pre-built model
@@ -225,8 +231,6 @@ class ActorLanguage(nn.Module):
         sequences: torch.LongTensor,
         num_actions: Optional[Union[int, list[int]]] = None,
         attention_mask: Optional[torch.Tensor] = None,
-        pixel_values: Optional[torch.Tensor] = None,
-        image_grid_thw: Optional[torch.Tensor] = None,
         return_output: bool = False,
         packed_seq_lens: Optional[list[int]] = None,
     ):
@@ -236,16 +240,15 @@ class ActorLanguage(nn.Module):
         Computes action log probabilities for reinforcement learning training. Supports both
         regular and packed sequence processing for efficient training.
 
+        NOTE: This is a text-only model. It does NOT accept pixel_values, image_grid_thw,
+        pixel_values_videos, or video_grid_thw parameters. Use ActorVL for multimodal inputs.
+
         :param sequences: Input token sequences.
         :type sequences: torch.LongTensor
         :param num_actions: Number of action tokens to extract log probabilities for.
         :type num_actions: Optional[Union[int, List[int]]]
         :param attention_mask: Attention mask for the sequences.
         :type attention_mask: Optional[torch.Tensor]
-        :param pixel_values: Pixel values for vision-language models (currently unused).
-        :type pixel_values: Optional[torch.Tensor]
-        :param image_grid_thw: Image grid dimensions for vision-language models (currently unused).
-        :type image_grid_thw: Optional[torch.Tensor]
         :param return_output: Whether to return the full model output along with action log probabilities.
         :type return_output: bool
         :param packed_seq_lens: Sequence lengths for packed samples.
@@ -284,19 +287,45 @@ class ActorLanguage(nn.Module):
 
         log_probs = log_probs_from_logits(output["logits"][:, :-1, :], sequences[:, 1:])
 
+        # Calculate entropy for action tokens (for high-entropy token identification)
+        # Only compute entropy when high_entropy_token_ratio is not 0
+        if self.high_entropy_token_ratio > 0.0:
+            action_logits = output["logits"][:, :-1, :]  # Shape: (batch, seq_len-1, vocab_size)
+            action_entropy = entropy_from_logits(action_logits)  # Shape: (batch, seq_len-1)
+        else:
+            action_entropy = None
+
         if not self.packing_samples:
             action_log_probs = log_probs[:, -num_actions:]
+            if action_entropy is not None:
+                action_entropy = action_entropy[:, -num_actions:]
         else:
             assert isinstance(num_actions, list) and len(num_actions) == len(packed_seq_lens)
             action_log_probs = []
+            action_entropy_list = []
             offset = 0
             for na, sl in zip(num_actions, packed_seq_lens):
                 start, end = max(0, offset + sl - na - 1), offset + sl - 1
                 action_log_probs.append(log_probs[:, start:end])
+                if action_entropy is not None:
+                    action_entropy_list.append(action_entropy[:, start:end])
                 offset += sl
             action_log_probs = torch.cat(action_log_probs, dim=1)
+            if action_entropy is not None:
+                action_entropy = torch.cat(action_entropy_list, dim=1)
 
-        return (action_log_probs, output) if return_output else action_log_probs
+        if return_output:
+            # Include action_entropy in output if computed
+            if action_entropy is not None:
+                # Convert ModelOutput (dataclass) to dict to allow adding new fields
+                # output type: ModelOutput (e.g., CausalLMOutputWithPast) - supports dict-like access
+                # but cannot directly add new keys. Converting to dict enables adding action_entropy.
+                output_dict = dict(output)  # Type: dict[str, torch.Tensor]
+                output_dict["action_entropy"] = action_entropy
+                return (action_log_probs, output_dict)
+            return (action_log_probs, output)
+        else:
+            return action_log_probs
 
     def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs={"use_reentrant": False}):
         """

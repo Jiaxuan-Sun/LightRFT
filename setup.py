@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="LightRFT",
-    version="0.1.0",
+    version="0.1.1",
     author="LightRFT Team",
     author_email="opendilab@pjlab.org.cn",
     description="LightRFT: Light, Efficient, Omni-modal & Reward-model Driven Reinforcement Fine-Tuning Framework",
@@ -19,24 +19,11 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    python_requires=">=3.10",
-    install_requires=[
-        "torch>=2.5.1",
-        "transformers==4.51.3",
-        "vllm==0.7.3",
-        "sglang==0.4.5",
-        "deepspeed>=0.15.0",
-        "accelerate",
-        "datasets",
-        "wandb",
-        "peft",
-        "easydict",
-    ],
+    python_requires=">=3.12",
     extras_require={
         "dev": [
             "pytest",
@@ -51,6 +38,11 @@ setup(
             "latex2sympy2",
             "timeout_decorator",
             "word2number",
+        ],
+        # Optional vLLM backend support
+        # Install with: pip install "LightRFT[vllm]"
+        "vllm": [
+            "vllm>=0.13.3",
         ],
     },
     keywords=[
