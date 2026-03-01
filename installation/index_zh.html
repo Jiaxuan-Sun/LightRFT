@@ -1,0 +1,740 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>安装指南 &mdash; LightRFT v0.1.1 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/readthedocs.css" type="text/css" />
+  <link rel="index" title="Index" href="../genindex.html" />
+  <link rel="search" title="Search" href="../search.html" />
+  <!-- Google Analytics -->
+  <script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/LightRFT" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/LightZero" target="_blank">
+                  <span class="dropdown-title">LightZero </span>
+                  <p>OpenDILab Decision Monte Carlo Tree Search Framework</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GenerativeRL" target="_blank">
+                  <span class="dropdown-title">GenerativeRL </span>
+                  <p>OpenDILab Generative AI Framework</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quick_start/index.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide &amp; Best Practices</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../best_practice/index.html">Best Practices</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_doc/utils/index.html">lightrft.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_doc/datasets/index.html">lightrft.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_doc/models/index.html">lightrft.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_doc/strategy/index.html">lightrft.strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_doc/trainer/index.html">lightrft.trainer</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+      <li>安装指南</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/installation/index_zh.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="installation-cn">
+<span id="id1"></span><h1>安装指南<a class="headerlink" href="#installation-cn" title="Permalink to this heading">¶</a></h1>
+<p>本指南提供了 LightRFT 的安装和设置说明。LightRFT 是一个轻量化、高性能的强化学习微调框架，专为大语言模型（LLM）和视觉语言模型（VLM）设计。</p>
+<section id="id2">
+<h2>环境要求<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<p>在安装 LightRFT 之前，请确保您的环境满足以下要求：</p>
+<ul class="simple">
+<li><p>Python &gt;= 3.12</p></li>
+<li><p>CUDA &gt;= 12.8</p></li>
+<li><p>PyTorch &gt;= 2.9.1</p></li>
+<li><p>支持 CUDA 的 GPU</p></li>
+</ul>
+</section>
+<section id="docker">
+<h2>Docker 镜像<a class="headerlink" href="#docker" title="Permalink to this heading">¶</a></h2>
+<p>TO BE DONE</p>
+</section>
+<section id="id3">
+<h2>安装步骤<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<section id="id4">
+<h3>标准安装<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>LightRFT 默认使用 <strong>SGLang</strong> 作为推理后端，并包含 <strong>Flash-Attention</strong> 以优化性能。</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 克隆仓库</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/opendilab/LightRFT.git
+<span class="nb">cd</span><span class="w"> </span>LightRFT
+
+<span class="c1"># 安装 LightRFT 及所有核心依赖</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<p><strong>安装内容</strong>: PyTorch、SGLang、Flash-Attention、Transformers、DeepSpeed 和其他核心依赖。</p>
+</section>
+<section id="vllm">
+<h3>可选：安装 vLLM 后端<a class="headerlink" href="#vllm" title="Permalink to this heading">¶</a></h3>
+<p>如果您想使用 vLLM 替代（或配合）SGLang：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装 vLLM 后端</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;.[vllm]&quot;</span>
+
+<span class="c1"># 或直接安装 vLLM</span>
+pip<span class="w"> </span>install<span class="w"> </span>vllm&gt;<span class="o">=</span><span class="m">0</span>.13.3
+</pre></div>
+</div>
+</section>
+<section id="flash-attention">
+<h3>Flash-Attention 安装问题排查<a class="headerlink" href="#flash-attention" title="Permalink to this heading">¶</a></h3>
+<p>Flash-Attention 默认包含在安装中，但在某些系统上可能因 CUDA 兼容性而安装失败。如果遇到问题，请尝试：</p>
+<p><strong>方式 1: 使用预编译的 wheel 文件（推荐）</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 从 https://github.com/Dao-AILab/flash-attention/releases 下载适合的 wheel 文件</span>
+<span class="c1"># 例如 CUDA 12.x 和 PyTorch 2.9:</span>
+pip<span class="w"> </span>install<span class="w"> </span>flash_attn-2.8.3+cu12torch2.9cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+</pre></div>
+</div>
+<p><strong>方式 2: 使用 Docker（最简单）</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 官方 Docker 镜像包含所有依赖</span>
+docker<span class="w"> </span>pull<span class="w"> </span>opendilab/lightrft:v0.1.0
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>生成文档（可选）<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p>安装文档生成所需的依赖：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-doc.txt
+</pre></div>
+</div>
+<p>生成 HTML 文档：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>docs
+</pre></div>
+</div>
+<p>文档将生成在 <code class="docutils literal notranslate"><span class="pre">docs/build</span></code> 目录中，打开 <code class="docutils literal notranslate"><span class="pre">index.html</span></code> 即可查看。</p>
+<p>启动带自动重载的实时文档服务器：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>docs-live
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h2>项目结构<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h2>
+<p>LightRFT 组织成几个关键模块：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>LightRFT/
+├── lightrft/                      # 核心库
+│   ├── datasets/                  # 数据集实现
+│   │   ├── audio_alpaca.py        # 音频数据集
+│   │   ├── grm_dataset.py         # 通用奖励模型数据集
+│   │   ├── prompts_dataset.py     # 提示数据集
+│   │   ├── prompts_dataset_vl.py  # 视觉语言提示数据集
+│   │   ├── sft_dataset.py         # SFT 数据集
+│   │   ├── sft_dataset_vl.py      # 视觉语言 SFT 数据集
+│   │   ├── srm_dataset.py         # 安全奖励模型数据集
+│   │   └── utils.py               # 数据集工具
+│   ├── models/                    # 模型定义
+│   │   ├── actor_al.py            # 音频-语言 Actor 模型
+│   │   ├── actor_language.py      # 语言 Actor 模型
+│   │   ├── actor_vl.py            # 视觉-语言 Actor 模型
+│   │   ├── grm_vl.py              # 通用奖励模型 (VL)
+│   │   ├── srm_al.py              # 安全奖励模型 (AL)
+│   │   ├── srm_vl.py              # 安全奖励模型 (VL)
+│   │   ├── loss.py                # 损失函数
+│   │   ├── utils.py               # 模型工具
+│   │   └── monkey_patch/          # 模型适配补丁
+│   │       ├── apply.py           # 补丁应用
+│   │       ├── hf_generate_patch.py  # HuggingFace generate 补丁
+│   │       ├── llama.py           # LLaMA 补丁
+│   │       └── qwen.py            # Qwen 补丁
+│   ├── strategy/                  # 训练&amp;推理策略
+│   │   ├── config.py              # 策略配置
+│   │   ├── fake_strategy.py       # 测试用假策略
+│   │   ├── strategy.py            # 主策略实现
+│   │   ├── strategy_base.py       # 策略基类
+│   │   ├── deepspeed/             # DeepSpeed 实现
+│   │   │   ├── deepspeed.py       # DeepSpeed 策略
+│   │   │   └── deepspeed_utils.py # DeepSpeed 工具
+│   │   ├── fsdp/                  # FSDP 实现
+│   │   │   ├── fsdp_optimizer.py  # FSDP 优化器
+│   │   │   ├── fsdp_utils.py      # FSDP 工具
+│   │   │   └── fsdpv2.py          # FSDP v2 实现
+│   │   ├── sglang_utils/          # SGLang 工具
+│   │   │   ├── sglang_engine.py   # SGLang 引擎
+│   │   │   └── sgl_model_saver.py # SGLang 模型保存器
+│   │   ├── vllm_utils/            # vLLM 工具
+│   │   │   └── vllm_worker_wrap_no_ray.py  # vLLM worker 包装器
+│   │   └── utils/                 # 策略工具
+│   │       ├── broadcast_utils.py # 广播工具
+│   │       ├── ckpt_utils.py      # 检查点工具
+│   │       ├── data_utils.py      # 数据工具
+│   │       ├── distributed_util.py  # 分布式工具
+│   │       ├── optimizer_utils.py # 优化器工具
+│   │       ├── parallel_utils.py  # 并行工具
+│   │       └── statistic.py       # 统计工具
+│   ├── trainer/                   # Trainer 实现
+│   │   ├── experience_maker.py    # 经验生成器
+│   │   ├── experience_maker_vl.py # VLM 经验生成器
+│   │   ├── fast_exp_maker.py      # 快速经验生成器
+│   │   ├── grm_trainer_vl.py      # 通用奖励模型训练器 (VL)
+│   │   ├── kl_controller.py       # KL 散度控制器
+│   │   ├── ppo_trainer.py         # PPO 训练器
+│   │   ├── ppo_trainer_vl.py      # 视觉-语言 PPO 训练器
+│   │   ├── replay_buffer.py       # 回放缓冲区
+│   │   ├── replay_buffer_utils.py # 回放缓冲区工具
+│   │   ├── replay_buffer_vl.py    # 视觉-语言回放缓冲区
+│   │   ├── spmd_ppo_trainer.py    # SPMD PPO 训练器
+│   │   ├── srm_trainer_al.py      # 安全奖励模型训练器 (AL)
+│   │   ├── srm_trainer_vl.py      # 安全奖励模型训练器 (VL)
+│   │   └── utils.py               # 训练器工具
+│   └── utils/                     # 工具函数
+│       ├── cli_args.py            # CLI 参数解析
+│       ├── distributed_sampler.py # 分布式采样器
+│       ├── logging_utils.py       # 日志工具
+│       ├── processor.py           # 数据处理器
+│       ├── remote_rm_utils.py     # 远程奖励模型工具
+│       ├── timer.py               # 计时器工具
+│       ├── trajectory_saver.py    # 轨迹保存工具
+│       └── utils.py               # 通用工具
+│
+├── examples/                      # 使用示例
+│   ├── chat/                      # 对话模型训练示例
+│   ├── grm_training/              # 通用奖励模型训练示例
+│   ├── gsm8k_geo3k/               # GSM8K/Geo3K 数学推理示例
+│   │   ├── data_preprocess/       # 数据预处理脚本
+│   │   ├── train_colocate.py      # 协同定位训练脚本
+│   │   ├── reward_models_utils.py # 奖励模型工具
+│   │   ├── run_grpo_gsm8k_qwen2.5_0.5b.sh    # GSM8K 训练脚本
+│   │   └── run_grpo_geo3k_qwen2.5_vl_7b.sh   # Geo3K VLM 训练脚本
+│   └── srm_training/              # 安全奖励模型训练示例
+│
+├── docs/                          # 📚 Sphinx 文档
+│   └── source/
+│       ├── installation/          # 安装指南
+│       ├── quick_start/           # 快速开始 &amp; 用户指南
+│       ├── best_practice/         # 最佳实践 &amp; 资源
+│       └── api_doc/               # API 文档
+│           ├── datasets/          # 数据集 API
+│           ├── models/            # 模型 API
+│           ├── strategy/          # 策略 API
+│           ├── trainer/           # 训练器 API
+│           └── utils/             # 工具 API
+│
+├── assets/                        # 资源文件
+│   └── logo.png                   # 项目Logo
+│
+├── results/                       # 训练结果
+├── rft_logs/                      # 训练日志
+├── requirements.txt               # Python 依赖
+├── requirements-dev.txt           # 开发依赖
+├── requirements-doc.txt           # 文档依赖
+├── setup.py                       # 包设置
+└── README.md                      # 项目文档
+</pre></div>
+</div>
+<section id="id7">
+<h3>关键目录说明<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>lightrft/</strong>：LightRFT 核心库，包含五个主要模块：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">datasets/</span></code>：数据集实现，支持提示、SFT、奖励建模（文本、视觉-语言、音频-语言）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">models/</span></code>：Actor 模型（语言、视觉-语言、音频-语言）、奖励模型和损失函数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">strategy/</span></code>：训练策略，包括 FSDP、DeepSpeed、vLLM/SGLang 集成</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer/</span></code>：训练器实现，包括 PPO、经验生成和回放缓冲区</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">utils/</span></code>：工具函数，用于 CLI、日志、分布式训练和轨迹保存</p></li>
+</ul>
+</li>
+<li><p><strong>examples/</strong>：完整的训练示例和脚本</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">gsm8k_geo3k/</span></code>：GSM8K 和 Geo3K 数学推理训练示例</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grm_training/</span></code>：通用奖励模型训练示例</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">srm_training/</span></code>：安全奖励模型训练示例</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chat/</span></code>：对话模型训练示例</p></li>
+</ul>
+</li>
+<li><p><strong>docs/</strong>：Sphinx 文档，包含完整的用户指南和 API 文档</p></li>
+</ul>
+</section>
+</section>
+<section id="id8">
+<h2>验证安装<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
+<p>验证安装是否成功，运行简单测试：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import lightrft; print(lightrft)&quot;</span>
+</pre></div>
+</div>
+<p>如果没有导入错误，您应该会看到模块路径。</p>
+</section>
+<section id="id9">
+<h2>快速开始示例<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
+<p>安装完成后，尝试一个基础的 GRPO 训练示例：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 单节点 8 GPU 训练示例</span>
+<span class="nb">cd</span><span class="w"> </span>/path/to/LightRFT
+
+<span class="c1"># 运行 GRPO 训练（GSM8K 数学推理任务）</span>
+bash<span class="w"> </span>examples/gsm8k_geo3k/run_grpo_gsm8k_qwen2.5_0.5b.sh
+
+<span class="c1"># 或者运行 Geo3K 几何问题训练（VLM 多模态）</span>
+bash<span class="w"> </span>examples/gsm8k_geo3k/run_grpo_geo3k_qwen2.5_vl_7b.sh
+</pre></div>
+</div>
+</section>
+<section id="id10">
+<h2>故障排除<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
+<section id="id11">
+<h3>常见问题<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<p><strong>问题</strong>：CUDA 错误或版本不匹配</p>
+<ul class="simple">
+<li><p><strong>解决方案</strong>：确保 CUDA 驱动和工具包版本与 PyTorch 安装匹配。使用 <code class="docutils literal notranslate"><span class="pre">nvcc</span> <span class="pre">--version</span></code> 和 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">torch;</span> <span class="pre">print(torch.version.cuda)&quot;</span></code> 检查</p></li>
+</ul>
+<p><strong>问题</strong>：训练时内存不足错误</p>
+<ul class="simple">
+<li><p><strong>解决方案</strong>：</p>
+<ul>
+<li><p>减小 <code class="docutils literal notranslate"><span class="pre">micro_train_batch_size</span></code> 或 <code class="docutils literal notranslate"><span class="pre">micro_rollout_batch_size</span></code></p></li>
+<li><p>启用梯度检查点：<code class="docutils literal notranslate"><span class="pre">--gradient_checkpointing</span></code></p></li>
+<li><p>使用 FSDP + CPU 卸载：<code class="docutils literal notranslate"><span class="pre">--fsdp</span> <span class="pre">--fsdp_cpu_offload</span></code></p></li>
+<li><p>调整引擎内存利用率：<code class="docutils literal notranslate"><span class="pre">--engine_mem_util</span> <span class="pre">0.4</span></code></p></li>
+</ul>
+</li>
+</ul>
+<p><strong>问题</strong>：评测依赖安装缓慢</p>
+<ul>
+<li><p><strong>解决方案</strong>：使用镜像或代理进行 pip 安装：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-i<span class="w"> </span>https://pypi.tuna.tsinghua.edu.cn/simple<span class="w"> </span>&lt;package&gt;
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id12">
+<h3>获取更多支持<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<p>如果遇到此处未涵盖的问题：</p>
+<ul class="simple">
+<li><p>查看项目的 <a class="reference external" href="https://github.com/opendilab/LightRFT/issues">GitHub Issues</a></p></li>
+<li><p>查阅 <a class="reference internal" href="../best_practice/strategy_zh.html"><span class="doc">Strategy 使用指南</span></a> 了解训练配置</p></li>
+<li><p>参考 <code class="docutils literal notranslate"><span class="pre">examples/</span></code> 目录中的示例脚本</p></li>
+</ul>
+</section>
+</section>
+<section id="id13">
+<h2>后续步骤<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h2>
+<p>安装成功后：</p>
+<ol class="arabic simple">
+<li><p>查阅 <span class="xref std std-doc">../quick_start</span> 指南了解基本使用方法</p></li>
+<li><p>探索 <a class="reference internal" href="../best_practice/strategy_zh.html"><span class="doc">Strategy 使用指南</span></a> 了解分布式训练策略</p></li>
+<li><p>查看 <code class="docutils literal notranslate"><span class="pre">examples/</span></code> 目录中的完整训练示例</p></li>
+<li><p>阅读算法文档了解具体实现细节</p></li>
+</ol>
+</section>
+<section id="id14">
+<h2>相关文档<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><span class="xref std std-doc">../quick_start</span> - 快速开始指南</p></li>
+<li><p><span class="xref std std-doc">../best_practice/strategy_usage</span> - Strategy 使用指南</p></li>
+<li><p><span class="xref std std-doc">../api/index</span> - API 参考</p></li>
+</ul>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2025, OpenDILab.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">安装指南</a><ul>
+<li><a class="reference internal" href="#id2">环境要求</a></li>
+<li><a class="reference internal" href="#docker">Docker 镜像</a></li>
+<li><a class="reference internal" href="#id3">安装步骤</a><ul>
+<li><a class="reference internal" href="#id4">标准安装</a></li>
+<li><a class="reference internal" href="#vllm">可选：安装 vLLM 后端</a></li>
+<li><a class="reference internal" href="#flash-attention">Flash-Attention 安装问题排查</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id5">生成文档（可选）</a></li>
+<li><a class="reference internal" href="#id6">项目结构</a><ul>
+<li><a class="reference internal" href="#id7">关键目录说明</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id8">验证安装</a></li>
+<li><a class="reference internal" href="#id9">快速开始示例</a></li>
+<li><a class="reference internal" href="#id10">故障排除</a><ul>
+<li><a class="reference internal" href="#id11">常见问题</a></li>
+<li><a class="reference internal" href="#id12">获取更多支持</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">后续步骤</a></li>
+<li><a class="reference internal" href="#id14">相关文档</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../"
+    src="../_static/documentation_options.js"></script>
+  <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script src="../_static/doctools.js"></script>
+  <script src="../_static/sphinx_highlight.js"></script>
+  <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/LightRFT" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

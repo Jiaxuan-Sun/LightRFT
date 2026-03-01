@@ -1,0 +1,823 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>lightrft.trainer.replay_buffer_utils &mdash; LightRFT v0.1.1 documentation</title>
+  
+
+  <link rel="shortcut icon" href="../../_static/images/favicon.ico" />
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/readthedocs.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" />
+  <link rel="next" title="lightrft.trainer.replay_buffer_vl" href="replay_buffer_vl.html" />
+  <link rel="prev" title="lightrft.trainer.replay_buffer" href="replay_buffer.html" />
+  <!-- Google Analytics -->
+  <script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+  <script>
+    MathJax = {
+        chtml: {
+            scale: 1,
+            minScale: 1,
+        },
+        svg: {
+            scale: 1,
+            minScale: 1,
+        }
+    }
+</script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/"
+        aria-label="OpenMMLab"></a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/LightRFT" target="_blank">GitHub</a>
+          </li>
+          <li >
+            <div id="resourcesDropdownButton" data-toggle="resources-dropdown" class="resources-dropdown">
+              <a
+                class="resource-option with-down-arrow">
+                OpenDILab
+              </a>
+              <div class="resources-dropdown-menu">
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-engine" target="_blank">
+                  <span class="dropdown-title">DI-engine </span>
+                  <p>OpenDILab Decision AI Engine</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/LightZero" target="_blank">
+                  <span class="dropdown-title">LightZero </span>
+                  <p>OpenDILab Decision Monte Carlo Tree Search Framework</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GenerativeRL" target="_blank">
+                  <span class="dropdown-title">GenerativeRL </span>
+                  <p>OpenDILab Generative AI Framework</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-star" target="_blank">
+                  <span class="dropdown-title">DI-star </span>
+                  <p>OpenDILab Decision AI in StarCraftII</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-drive" target="_blank">
+                  <span class="dropdown-title">DI-drive </span>
+                  <p>OpenDILab Auto-driving platform</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/GoBigger" target="_blank">
+                  <span class="dropdown-title">GoBigger </span>
+                  <p>OpenDILab Multi-Agent Environment</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-smartcross" target="_blank">
+                  <span class="dropdown-title">DI-smartcross </span>
+                  <p>Decision Intelligence Platform for Traffic Crossing Signal Control</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-treetensor" target="_blank">
+                  <span class="dropdown-title">DI-treetensor </span>
+                  <p>Tree Nested PyTorch Tensor Lib</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/DI-sheep" target="_blank">
+                  <span class="dropdown-title">DI-sheep </span>
+                  <p>Deep Reinforcement Learning + 3 Tiles Game</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-model-based-RL" target="_blank">
+                  <span class="dropdown-title">awesome-model-based-RL </span>
+                  <p>A curated list of awesome model based RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-decision-transformer" target="_blank">
+                  <span class="dropdown-title">awesome-decision-transformer </span>
+                  <p>A curated list of Decision Transformer resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-exploration-rl" target="_blank">
+                  <span class="dropdown-title">awesome-exploration-rl </span>
+                  <p>A curated list of awesome exploration RL resources (continually updated)</p>
+                </a>
+                <a class="doc-dropdown-option nav-dropdown-item"
+                  href="https://github.com/opendilab/awesome-multi-modal-reinforcement-learning" target="_blank">
+                  <span class="dropdown-title">awesome-multi-modal-reinforcement-learning </span>
+                  <p>A curated list of Multi-Modal Reinforcement Learning resources (continually updated)</p>
+                </a>
+              </div>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+    <div class="pytorch-side-scroll">
+      <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <div class="pytorch-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start/index.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide &amp; Best Practices</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../best_practice/index.html">Best Practices</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">lightrft.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datasets/index.html">lightrft.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models/index.html">lightrft.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../strategy/index.html">lightrft.strategy</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">lightrft.trainer</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="pytorch-container">
+    <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+      <div class="pytorch-breadcrumbs-wrapper">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../index.html">
+            Docs
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="index.html">lightrft.trainer</a> &gt;</li>
+        
+      <li>lightrft.trainer.replay_buffer_utils</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api_doc/trainer/replay_buffer_utils.rst.txt" rel="nofollow"><img src="../../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+      </div>
+
+      <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+      <div class="pytorch-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+                
+  <section id="module-lightrft.trainer.replay_buffer_utils">
+<span id="lightrft-trainer-replay-buffer-utils"></span><h1>lightrft.trainer.replay_buffer_utils<a class="headerlink" href="#module-lightrft.trainer.replay_buffer_utils" title="Permalink to this heading">¶</a></h1>
+<p>Utility functions for replay buffer operations in reinforcement learning.</p>
+<p>This module provides specialized functions for handling both language model
+experiences and vision-language model experiences. It includes utilities for batch
+splitting, sequence padding, and experience creation optimized for distributed training.</p>
+<p>Key features:
+- Automatic detection of experience types
+- Efficient batch splitting and creation
+- Sequence padding and padding removal
+- Support for both packed and unpacked samples</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">BufferItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_log_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_action_log_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advantages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.LongTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.BoolTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_entropy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#BufferItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>BufferItem is an item of experience data.</p>
+<p>Shapes of each tensor:
+sequences: (S)
+action_log_probs: (A)
+base_action_log_probs: (A)
+values: (1)
+returns: (1)
+advantages: (1)
+attention_mask: (S)
+action_mask: (A)
+action_entropy: (A) - Entropy values for high-entropy token filtering</p>
+<p>“A” is the number of actions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.action_entropy">
+<span class="sig-name descname"><span class="pre">action_entropy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.action_log_probs">
+<span class="sig-name descname"><span class="pre">action_log_probs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_log_probs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.action_mask">
+<span class="sig-name descname"><span class="pre">action_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.BoolTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.advantages">
+<span class="sig-name descname"><span class="pre">advantages</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.advantages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.attention_mask">
+<span class="sig-name descname"><span class="pre">attention_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.LongTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.attention_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.base_action_log_probs">
+<span class="sig-name descname"><span class="pre">base_action_log_probs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.base_action_log_probs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.returns">
+<span class="sig-name descname"><span class="pre">returns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.sequences">
+<span class="sig-name descname"><span class="pre">sequences</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.sequences" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItem.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItem.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">BufferItemVL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_grid_thws</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_values_videos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_grid_thws</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Image</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_log_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_action_log_probs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advantages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.LongTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.BoolTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_entropy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#BufferItemVL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>BufferItemVL is an item of experience data.</p>
+<p>Shapes of each tensor:
+sequences: (S)
+pixel_values: (B*H, W)
+image_grid_thws: (B, 3)
+raw_images: Optional[List[Image.Image]]  # raw images before processing
+action_log_probs: (A)
+base_action_log_probs: (A)
+values: (1)
+returns: (1)
+advantages: (1)
+attention_mask: (S)
+action_mask: (A)
+action_entropy: (A) - Entropy values for high-entropy token filtering</p>
+<p>“A” is the number of actions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.action_entropy">
+<span class="sig-name descname"><span class="pre">action_entropy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_entropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.action_log_probs">
+<span class="sig-name descname"><span class="pre">action_log_probs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_log_probs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.action_mask">
+<span class="sig-name descname"><span class="pre">action_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.BoolTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.advantages">
+<span class="sig-name descname"><span class="pre">advantages</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.advantages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.attention_mask">
+<span class="sig-name descname"><span class="pre">attention_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.LongTensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.attention_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.base_action_log_probs">
+<span class="sig-name descname"><span class="pre">base_action_log_probs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.base_action_log_probs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.image_grid_thws">
+<span class="sig-name descname"><span class="pre">image_grid_thws</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.image_grid_thws" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.info">
+<span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values">
+<span class="sig-name descname"><span class="pre">pixel_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values_videos">
+<span class="sig-name descname"><span class="pre">pixel_values_videos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values_videos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.raw_images">
+<span class="sig-name descname"><span class="pre">raw_images</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Image</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.raw_images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.returns">
+<span class="sig-name descname"><span class="pre">returns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.sequences">
+<span class="sig-name descname"><span class="pre">sequences</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.sequences" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.BufferItemVL.video_grid_thws">
+<span class="sig-name descname"><span class="pre">video_grid_thws</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.video_grid_thws" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.is_vl_experience">
+<span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">is_vl_experience</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience"><span class="pre">Experience</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL"><span class="pre">ExperienceVL</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#is_vl_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.is_vl_experience" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if an experience is a vision-language experience.</p>
+<p>Checks for the presence of vision-specific attributes to distinguish between
+language model experiences and vision-language experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>experience</strong> (<em>Union</em><em>[</em><a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience"><em>Experience</em></a><em>, </em><a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL"><em>ExperienceVL</em></a><em>]</em>) – The experience object to check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the experience contains vision data, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exp</span> <span class="o">=</span> <span class="n">ExperienceVL</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">is_vl_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This is a vision-language experience&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.make_experience_batch">
+<span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">make_experience_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packing_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience"><span class="pre">Experience</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL"><span class="pre">ExperienceVL</span></a></span></span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#make_experience_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.make_experience_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a batch experience from individual items.</p>
+<p>This generic function automatically detects the item type
+and delegates to the appropriate batch creation function. It handles both packed
+and unpacked samples efficiently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>List</em>) – List of individual experience items to batch</p></li>
+<li><p><strong>packing_samples</strong> (<em>bool</em>) – Whether to pack samples without padding (True) or use padding (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Batched experience (either Experience or ExperienceVL)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience">Experience</a>, <a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL">ExperienceVL</a>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If items list is empty</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create batch from items</span>
+<span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">BufferItem</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">BufferItem</span><span class="p">(</span><span class="o">...</span><span class="p">)]</span>
+<span class="n">batch_exp</span> <span class="o">=</span> <span class="n">make_experience_batch</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">packing_samples</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Create batch from vision-language items</span>
+<span class="n">vl_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">BufferItemVL</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">BufferItemVL</span><span class="p">(</span><span class="o">...</span><span class="p">)]</span>
+<span class="n">batch_vl_exp</span> <span class="o">=</span> <span class="n">make_experience_batch</span><span class="p">(</span><span class="n">vl_items</span><span class="p">,</span> <span class="n">packing_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.remove_padding_in_sequences">
+<span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">remove_padding_in_sequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#remove_padding_in_sequences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.remove_padding_in_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove padding from sequences in experience items.</p>
+<p>This generic function automatically detects the item type and delegates to the
+appropriate padding removal function. It removes both left and right padding
+from sequences to restore their original lengths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>List</em>) – List of experience items with padded sequences</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of experience items with padding removed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Remove padding from items</span>
+<span class="n">padded_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">BufferItem</span><span class="p">(</span><span class="n">sequences</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="o">...</span><span class="p">)]</span>
+<span class="n">clean_items</span> <span class="o">=</span> <span class="n">remove_padding_in_sequences</span><span class="p">(</span><span class="n">padded_items</span><span class="p">)</span>
+<span class="c1"># Result: sequences become torch.tensor([1,2,3])</span>
+
+<span class="c1"># Remove padding from vision-language items</span>
+<span class="n">padded_vl_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">BufferItemVL</span><span class="p">(</span><span class="n">sequences</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="o">...</span><span class="p">)]</span>
+<span class="n">clean_vl_items</span> <span class="o">=</span> <span class="n">remove_padding_in_sequences</span><span class="p">(</span><span class="n">padded_vl_items</span><span class="p">)</span>
+<span class="c1"># Result: sequences become torch.tensor([4,5,6])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.split_experience_batch">
+<span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">split_experience_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience"><span class="pre">Experience</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL"><span class="pre">ExperienceVL</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#split_experience_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.split_experience_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a batch of experiences into individual items.</p>
+<p>Automatically detects the experience type and delegates to the appropriate
+splitting function. This is a generic interface that handles both types of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>experience</strong> (<em>Union</em><em>[</em><a class="reference internal" href="experience_maker.html#lightrft.trainer.experience_maker.Experience" title="lightrft.trainer.experience_maker.Experience"><em>Experience</em></a><em>, </em><a class="reference internal" href="experience_maker_vl.html#lightrft.trainer.experience_maker_vl.ExperienceVL" title="lightrft.trainer.experience_maker_vl.ExperienceVL"><em>ExperienceVL</em></a><em>]</em>) – Batch experience to split into individual items</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of individual experience items</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Split a batch of experiences</span>
+<span class="n">batch_experience</span> <span class="o">=</span> <span class="n">make_experience_batch</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+<span class="n">individual_items</span> <span class="o">=</span> <span class="n">split_experience_batch</span><span class="p">(</span><span class="n">batch_experience</span><span class="p">)</span>
+
+<span class="c1"># Process each item individually</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">individual_items</span><span class="p">:</span>
+    <span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lightrft.trainer.replay_buffer_utils.zero_pad_sequences">
+<span class="sig-prename descclassname"><span class="pre">lightrft.trainer.replay_buffer_utils.</span></span><span class="sig-name descname"><span class="pre">zero_pad_sequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="reference internal" href="../../_modules/lightrft/trainer/replay_buffer_utils.html#zero_pad_sequences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lightrft.trainer.replay_buffer_utils.zero_pad_sequences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zero-pad a list of sequences to the same length.</p>
+<p>This utility function pads sequences to the maximum length in the batch,
+either on the left or right side. It is used for creating batched tensors
+from variable-length sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>List</em><em>[</em><em>torch.Tensor</em><em>]</em>) – List of sequences to pad (each sequence is a 1D tensor)</p></li>
+<li><p><strong>side</strong> (<em>str</em>) – Padding side, either “left” or “right”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Batched tensor of padded sequences</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If side is not “left” or “right”</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+<span class="p">]</span>
+
+<span class="c1"># Pad to the right</span>
+<span class="n">padded</span> <span class="o">=</span> <span class="n">zero_pad_sequences</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+<span class="c1"># Result: tensor([[1, 2, 3, 0],</span>
+<span class="c1">#                 [4, 5, 0, 0],</span>
+<span class="c1">#                 [6, 7, 8, 9]])</span>
+
+<span class="c1"># Pad to the left</span>
+<span class="n">padded_left</span> <span class="o">=</span> <span class="n">zero_pad_sequences</span><span class="p">(</span><span class="n">sequences</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+<span class="c1"># Result: tensor([[0, 1, 2, 3],</span>
+<span class="c1">#                 [0, 0, 4, 5],</span>
+<span class="c1">#                 [6, 7, 8, 9]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+    
+    <a href="replay_buffer_vl.html" class="btn btn-neutral float-right" title="lightrft.trainer.replay_buffer_vl" accesskey="n"
+      rel="next">Next <img src="../../_static/images/chevron-right-blue.svg"
+        class="next-page"></a>
+    
+    
+    <a href="replay_buffer.html" class="btn btn-neutral" title="lightrft.trainer.replay_buffer" accesskey="p"
+      rel="prev"><img src="../../_static/images/chevron-right-blue.svg" class="previous-page"> Previous</a>
+    
+  </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+      &copy; Copyright 2025, OpenDILab.
+
+    </p>
+  </div>
+  
+  <div>
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a
+      href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the
+      Docs</a>.
+  </div>
+   
+
+</footer>
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">lightrft.trainer.replay_buffer_utils</a><ul>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem"><code class="docutils literal notranslate"><span class="pre">BufferItem</span></code></a><ul>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_entropy"><code class="docutils literal notranslate"><span class="pre">BufferItem.action_entropy</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_log_probs"><code class="docutils literal notranslate"><span class="pre">BufferItem.action_log_probs</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.action_mask"><code class="docutils literal notranslate"><span class="pre">BufferItem.action_mask</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.advantages"><code class="docutils literal notranslate"><span class="pre">BufferItem.advantages</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.attention_mask"><code class="docutils literal notranslate"><span class="pre">BufferItem.attention_mask</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.base_action_log_probs"><code class="docutils literal notranslate"><span class="pre">BufferItem.base_action_log_probs</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.info"><code class="docutils literal notranslate"><span class="pre">BufferItem.info</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.returns"><code class="docutils literal notranslate"><span class="pre">BufferItem.returns</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.sequences"><code class="docutils literal notranslate"><span class="pre">BufferItem.sequences</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItem.values"><code class="docutils literal notranslate"><span class="pre">BufferItem.values</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL"><code class="docutils literal notranslate"><span class="pre">BufferItemVL</span></code></a><ul>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_entropy"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.action_entropy</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_log_probs"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.action_log_probs</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.action_mask"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.action_mask</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.advantages"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.advantages</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.attention_mask"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.attention_mask</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.base_action_log_probs"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.base_action_log_probs</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.image_grid_thws"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.image_grid_thws</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.info"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.info</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.pixel_values</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.pixel_values_videos"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.pixel_values_videos</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.raw_images"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.raw_images</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.returns"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.returns</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.sequences"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.sequences</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.values"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.values</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.BufferItemVL.video_grid_thws"><code class="docutils literal notranslate"><span class="pre">BufferItemVL.video_grid_thws</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.is_vl_experience"><code class="docutils literal notranslate"><span class="pre">is_vl_experience()</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.make_experience_batch"><code class="docutils literal notranslate"><span class="pre">make_experience_batch()</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.remove_padding_in_sequences"><code class="docutils literal notranslate"><span class="pre">remove_padding_in_sequences()</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.split_experience_batch"><code class="docutils literal notranslate"><span class="pre">split_experience_batch()</span></code></a></li>
+<li><a class="reference internal" href="#lightrft.trainer.replay_buffer_utils.zero_pad_sequences"><code class="docutils literal notranslate"><span class="pre">zero_pad_sequences()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" id="documentation_options" data-url_root="../../"
+    src="../../_static/documentation_options.js"></script>
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/sphinx_highlight.js"></script>
+  <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+  </div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://di-engine-docs.readthedocs.io/en/latest/" aria-label="OpenMMLab"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://github.com/opendilab/LightRFT" target="_blank">GitHub</a>
+          </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>
