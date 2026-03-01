@@ -144,7 +144,9 @@ class PolicyLoss(nn.Module):
             adv_std = token_advantages.std()
         if adv_std > 1e-8:
             return (token_advantages - adv_mean) / (adv_std + 1e-8)
-        return token_advantages - adv_mean
+        # When all advantages are identical (e.g. same reward in batch), (adv - mean) would
+        # zero out the learning signal and cause policy_loss=0. Skip normalization instead.
+        return token_advantages
 
     def _aggregate_token_loss(self, token_losses: torch.Tensor, action_mask: Optional[torch.Tensor]) -> torch.Tensor:
         """Aggregate token-level losses to a scalar loss using the specified aggregation mode."""

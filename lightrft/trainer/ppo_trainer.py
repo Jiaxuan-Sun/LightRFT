@@ -304,7 +304,8 @@ class PPOTrainer(ABC):
 
                 self.strategy.report_memory('after replay_buffer ready')
 
-                if self.args.advantage_estimator != "group_norm":
+                # Skip global advantage normalization for group_norm and GSPO (see ppo_trainer_vl comment).
+                if self.args.advantage_estimator not in ("group_norm", "gspo"):
                     self.replay_buffer.normalize("advantages", self.strategy)
                 self.strategy.report_memory('before train')
                 status = self.ppo_train(steps)

@@ -1488,36 +1488,18 @@ class FastExperienceMaker(NaiveExperienceMaker):
                 )
 
             elif self.advantage_estimator == "gspo":
-                # GSPO: Use sequence-level rewards directly as advantages
-                # GSPO works at the sequence level, so we use the scalar sequence reward
-                # as the advantage for the entire sequence
-                if "sequence_reward" in experience.info:
-                    # Use the stored sequence-level reward from reward shaping phase
-                    seq_reward_value = experience.info["sequence_reward"]
-                    # Convert scalar to tensor on the same device as final_reward
-                    seq_reward_tensor = torch.tensor(
-                        seq_reward_value, dtype=final_reward.dtype, device=final_reward.device
-                    )
-                    # Create a sequence-level advantage tensor (same value for all tokens in sequence)
-                    # Shape: [batch_size, seq_len] - all tokens in a sequence have the same advantage
-                    experience.advantages = torch.full_like(final_reward, seq_reward_tensor)
+                # GSPO: Use sequence-level rewards as advantages. Use final_reward (after
+                # normalization, clipping, KL) so the learning signal is consistent with other estimators.
+                if experience.action_mask is not None:
+                    # Mean reward over valid tokens per sequence (final_reward is per-token with KL)
+                    token_count = experience.action_mask.sum(dim=-1, keepdim=True).clamp(min=1e-6)
+                    seq_reward = (final_reward * experience.action_mask).sum(dim=-1, keepdim=True) / token_count
                 else:
-                    # Fallback: compute sequence reward from final_reward
-                    # This should not happen if reward shaping is done correctly, but provide fallback
-                    if experience.action_mask is not None:
-                        # Sum over sequence to get sequence-level reward
-                        seq_reward = (final_reward * experience.action_mask).sum(dim=-1, keepdim=True)
-                    else:
-                        seq_reward = final_reward.sum(dim=-1, keepdim=True)
-                    # Expand to all tokens (same value for all tokens in sequence)
-                    experience.advantages = seq_reward.expand_as(final_reward)
-
-                # For GSPO, returns are the same as advantages (sequence-level)
+                    seq_reward = final_reward.mean(dim=-1, keepdim=True)
+                experience.advantages = seq_reward.expand_as(final_reward)
                 experience.returns = experience.advantages.clone()
 
-                # Note: GSPO normalization is handled in the loss function, not here
-                # The loss function will normalize sequence-level advantages if normalize_advantages is enabled
-                # according to the GSPO paper specifications
+                # Note: GSPO normalization is handled in the loss function if normalize_advantages is enabled.
 
             elif self.advantage_estimator in ["reinforce", "rloo", "reinforce_baseline", "group_norm"]:
                 # Compute cumulative returns

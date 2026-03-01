@@ -144,7 +144,10 @@ class NaiveReplayBuffer(ABC):
         # Compute standard deviation
         std = ((items_vector - mean).pow(2) * action_masks_vector).sum()
         all_std = strategy.all_reduce(std, "sum")
-        rstd = (all_std / all_count).clamp(min=1e-8).rsqrt()
-
+        # When all advantages are identical (e.g. same reward in batch), skip normalization
+        # to avoid zeroing out the learning signal.
+        if (all_std / all_count).item() < 1e-16:  # skip when std < 1e-8 (variance < 1e-16)
+            return
+        rstd = (all_std / all_count).rsqrt()
         for i, item in enumerate(self):
             setattr(item, attribute, (items[i] - mean) * rstd)

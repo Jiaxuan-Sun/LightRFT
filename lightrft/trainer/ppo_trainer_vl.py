@@ -539,7 +539,11 @@ class PPOTrainerVL(ABC):
                         rollout_status["rollout_response_length"] = lengths_tensor.mean().item()
 
                 # TODO: Check normalization behavior
-                if self.args.advantage_estimator != "group_norm":
+                # Skip global advantage normalization for group_norm and GSPO:
+                # - group_norm already normalizes per-group in the reward shaping step.
+                # - GSPO uses sequence-level rewards; global (adv-mean)/std zeros advantages when
+                #   all rewards are identical (e.g. early training), causing policy_loss=0 and no learning.
+                if self.args.advantage_estimator not in ("group_norm", "gspo"):
                     self.replay_buffer.normalize("advantages", self.strategy)
 
                 self.strategy.report_memory('before train')
