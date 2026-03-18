@@ -1231,7 +1231,7 @@ class FastExperienceMaker(NaiveExperienceMaker):
                     all_images_num=all_images_num,
                     all_videos_num=all_videos_num,
                     sampling_params=sampling_params,
-                    tokenizer=self.tokenizer if is_multimodal else None,
+                    tokenizer=self.tokenizer,
                 )
             else:
                 # maybe this can be called in if and else respectively? or like this?

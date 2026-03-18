@@ -15,6 +15,7 @@ normalization are important for training stability and monitoring.
 
 import copy
 import torch
+from collections import Counter
 from copy import deepcopy
 from typing import Callable, List, Tuple, Union, Optional, Any
 
@@ -118,6 +119,20 @@ def fire_sampling(
         images_num=all_images_num if is_multimodal else None,
         videos_num=all_videos_num if is_multimodal else None,
     )
+
+    # Log first-token top-k frequency distribution
+    if tokenizer is not None:
+        first_token_ids = [list(out.output_token_ids)[0] for out in first_token_outputs]
+        token_counter = Counter(first_token_ids)
+        top_k_display = 20
+        most_common = token_counter.most_common(top_k_display)
+        decoded_tokens = tokenizer.batch_decode(
+            [[tid] for tid, _ in most_common], skip_special_tokens=False
+        )
+        stats_lines = [f"[FIRE] First-token top-{top_k_display} distribution (total={len(first_token_ids)}):"]
+        for (tid, count), decoded in zip(most_common, decoded_tokens):
+            stats_lines.append(f"  token_id={tid:>6d} | count={count:>4d} | freq={count/len(first_token_ids):.4f} | text={repr(decoded)}")
+        print("\n".join(stats_lines))
 
     # Concatenate the first token to the prompt (for Step 2 input).
     # Step 1 = above: generate only the first token at high temperature.
