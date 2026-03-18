@@ -514,6 +514,7 @@ class PPOTrainerVL(ABC):
                 # DYNAMIC SAMPLING PATH (DAPO)
                 # Accumulate qualified prompt groups across multiple generation
                 # batches until train_batch_size is reached.
+                # Reference implementation: https://github.com/verl-project/verl
                 #
                 # Flow:
                 # 1. Generate rollouts → append to temp buffer (split into items)
