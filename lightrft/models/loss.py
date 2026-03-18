@@ -165,6 +165,9 @@ class PolicyLoss(nn.Module):
     - GSPO: https://arxiv.org/abs/2507.18071
     - GMPO: https://arxiv.org/abs/2502.03950
     - High-Entropy Token Filtering: https://arxiv.org/abs/2506.01939
+    - Reference implementations:
+      - GMPO official repo: https://github.com/callsys/GMPO
+      - verl (RL training library with related algorithms): https://github.com/verl-project/verl
     """
     def __init__(
         self,
@@ -217,6 +220,9 @@ class PolicyLoss(nn.Module):
         :type final_mask: torch.Tensor
         :returns: Scalar GSPO policy loss.
         :rtype: torch.Tensor
+
+        Reference implementations:
+        - https://github.com/verl-project/verl
         """
         negative_approx_kl = log_probs - old_log_probs
 
@@ -275,6 +281,9 @@ class PolicyLoss(nn.Module):
         :type final_mask: torch.Tensor
         :returns: Scalar GMPO policy loss.
         :rtype: torch.Tensor
+
+        Reference implementations:
+        - https://github.com/callsys/GMPO
         """
         # Extract per-sequence advantage (constant across tokens for GRPO-style)
         seq_lengths = final_mask.sum(dim=-1).clamp(min=1)
