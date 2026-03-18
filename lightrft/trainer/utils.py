@@ -130,9 +130,7 @@ def fire_sampling(
         stats_lines = [f"[FIRE] First-token top-{top_k_display} distribution (total={len(first_token_ids)}):"]
         for (tid, count), decoded in zip(most_common, decoded_tokens):
             freq = count / len(first_token_ids)
-            stats_lines.append(
-                f"  token_id={tid:>6d} | count={count:>4d} | freq={freq:.4f} | text={repr(decoded)}"
-            )
+            stats_lines.append(f"  token_id={tid:>6d} | count={count:>4d} | freq={freq:.4f} | text={repr(decoded)}")
         print("\n".join(stats_lines))
 
     # Concatenate the first token to the prompt (for Step 2 input).
